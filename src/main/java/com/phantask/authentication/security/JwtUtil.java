@@ -11,6 +11,18 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
+/**
+ * Utility helper for creating, parsing and validating JSON Web Tokens (JWT).
+ *
+ * <p>This component centralizes token-related logic such as:
+ * <ul>
+ *   <li>Generating signed tokens containing user identity and claims</li>
+ *   <li>Extracting username or other claims from an existing token</li>
+ *   <li>Validating token expiration and signature</li>
+ * </ul>
+ *
+ * <p>Keep secret keys, expiration durations, and token formats configurable (e.g., via application.properties).
+ */
 @Component
 public class JwtUtil {
 	
@@ -24,7 +36,13 @@ public class JwtUtil {
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
-    
+
+	/**
+     * Generate a JWT for the given username and claims.
+     *
+     * @param username the subject (typically username or user id)
+     * @return a signed JWT string
+     */
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
             .setSubject(userDetails.getUsername())
@@ -43,6 +61,12 @@ public class JwtUtil {
             .compact();
     }
 
+	/**
+     * Extract the username (subject) from the JWT.
+     *
+     * @param token the JWT string
+     * @return the username embedded in the token
+     */
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
             .setSigningKey(getSigningKey())
@@ -52,6 +76,12 @@ public class JwtUtil {
             .getSubject();
     }
 
+	 /**
+     * Validate the provided JWT string.
+     *
+     * @param token the JWT to validate
+     * @return true if token is valid (signature and expiration), false otherwise
+     */
     public boolean isTokenValid(String token, UserDetails userDetails) {
         return extractUsername(token).equals(userDetails.getUsername()) && !isExpired(token);
     }
