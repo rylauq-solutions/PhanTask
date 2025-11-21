@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({
@@ -15,10 +16,13 @@ const LoginForm = () => {
     }));
   };
 
+  let navigate = useNavigate();
+
   const handleSubmit = (e) => {
     e.preventDefault();
     sessionStorage.setItem("authToken", "open");
     console.log("Submitted data:", formData);
+    navigate("/");
   };
 
   const handleReset = () => {
