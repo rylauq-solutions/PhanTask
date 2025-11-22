@@ -165,3 +165,46 @@ curl -v -X POST http://localhost:8080/api/users/change-password-first-login \
 Output:
 ------
 "Password changed successfully"
+
+Use Case 4: Create Student Account
+-----------------------------------
+Title: Admin creates a new student account with a temporary password.
+
+Actors:
+-------
+Primary Actor: Admin
+
+Preconditions:
+--------------
+1.Admin is already registered and logged in.
+2.Admin has the required privileges to create student accounts.
+3.Role STUDENT exists in the database.
+
+Postconditions:
+---------------
+1.A new student account is created in the database.
+2.The account has a temporary password (Temp@123).
+3.firstLogin flag is set to true for the student.
+
+Description / Flow:
+-------------------
+1.Admin sends a POST request to /api/users/create-student with the student’s email.
+2.System checks if the username already exists.
+3.System creates a new User entity with:
+  username from request
+  Password set to Temp@123 (BCrypt encoded)
+  enabled = true
+  firstLogin = true
+4.System assigns the role STUDENT to the new user.
+5.System saves the user in the database.
+6.System returns a success message along with the temporary password.
+
+Execute request with curl:
+curl -v -X POST http://localhost:8080/api/users/create-student \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..." \
+-d '{ "email": "student01@example.com" }'
+
+Output:
+-------
+"Student account created successfully. Username: student01, Temporary password: Temp@123"
