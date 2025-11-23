@@ -11,10 +11,13 @@ import Feedback from './pages/Feedback';
 import Settings from './pages/Settings';
 import Login from './pages/login_signup/Login';
 import PrivateRoute from './components/PrivateRoute';
+import { Toaster } from 'react-hot-toast';
+
 
 const App = () => {
   return (
     <BrowserRouter>
+      <Toaster position="top-center" />
       <Routes>
         {/* Public route */}
         <Route path="/login" element={<Login />} />
