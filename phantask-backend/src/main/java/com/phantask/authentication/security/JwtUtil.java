@@ -28,8 +28,9 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtUtil {
 	
-	private final long ACCESS_TOKEN_EXP = 1000 * 30; //30 seconds for testing
-    private final long REFRESH_TOKEN_EXP = 1000 * 60; //1 minute for testing
+	private final long ACCESS_TOKEN_EXP = 1000 * 60 * 5; //5 minutes for testing
+    private final long REFRESH_TOKEN_EXP = 1000 * 60 * 6; //6 minutes for testing
+
 
 
     @Value("${jwt.secret}")

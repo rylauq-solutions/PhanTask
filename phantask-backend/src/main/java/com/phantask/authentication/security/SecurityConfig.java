@@ -35,6 +35,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // Allow registration & login
+                .requestMatchers("/api/users/change-password-first-login").permitAll() //Allow first-login change
                 .anyRequest().authenticated()               // Protect everything else
             )
             .sessionManagement(sess -> 
