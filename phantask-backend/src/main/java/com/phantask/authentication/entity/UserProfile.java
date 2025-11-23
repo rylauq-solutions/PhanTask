@@ -1,5 +1,7 @@
 package com.phantask.authentication.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,6 +35,7 @@ public class UserProfile {
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId     
     @JoinColumn(name = "uid")
+    @JsonBackReference
     private User user;
 
     /**

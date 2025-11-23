@@ -9,8 +9,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.phantask.authentication.dto.AccountCreationResponse;
 import com.phantask.authentication.dto.PasswordChangeRequest;
 import com.phantask.authentication.dto.UpdateProfileRequest;
+import com.phantask.authentication.dto.UserProfileResponse;
 import com.phantask.authentication.entity.Role;
 import com.phantask.authentication.entity.User;
 import com.phantask.authentication.entity.UserProfile;
@@ -19,6 +21,7 @@ import com.phantask.authentication.repository.UserProfileRepository;
 import com.phantask.authentication.repository.UserRepository;
 import com.phantask.authentication.service.api.IUserService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,31 +70,54 @@ public class UserService implements IUserService {
     }
 
 	@Override
-    public String createAccount(String email) {
-        if (email == null || !email.contains("@")) {
-            throw new IllegalArgumentException("Invalid email format");
-        }
+	@Transactional
+	public AccountCreationResponse createAccount(String email) {
 
-        String username = email.substring(0, email.indexOf("@"));
-        if (userRepo.existsByUsername(username)) {
-            throw new RuntimeException("Username already exists");
-        }
+	    // Extract base username (before @)
+	    String baseUsername = email.substring(0, email.indexOf("@"));
+	    String username = baseUsername;
 
-        User user = new User();
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode("Temp@123"));
-        user.setEnabled(true);
-        user.setFirstLogin(true);
+	    // Auto-increment username if a duplicate exists
+	    int counter = 1;
+	    while (userRepo.existsByUsername(username)) {
+	        username = baseUsername + counter;     // ex: rahul → rahul1 → rahul2
+	        counter++;
+	    }
 
-        Role studentRole = roleRepo.findByRoleName("STUDENT")
-                .orElseThrow(() -> new RuntimeException("Role STUDENT not found"));
-        user.getRoles().add(studentRole);
+	    // Create new user
+	    User user = new User();
+	    user.setUsername(username);
+	    user.setEmail(email);
 
-        userRepo.save(user);
-        return "Student account created successfully. Temporary password: Temp@123 and Username is: "+ username;
-    }
+	    String tempPassword = "Temp@123";
+	    user.setPassword(passwordEncoder.encode(tempPassword));
+	    user.setEnabled(true);
+	    user.setFirstLogin(true);
 
+	    // Fetch STUDENT role
+	    Role studentRole = roleRepo.findByRoleName("STUDENT")
+	            .orElseThrow(() -> new RuntimeException("Role: STUDENT not found"));
+
+	    user.getRoles().add(studentRole);
+
+	    userRepo.save(user);
+        
+	    //Log securely (NO plain password)
+	    log.info("Student account created: username={}", username);
+	    
+        //TODO: do not send the password in response instead mail the student
+	    
+	    return new AccountCreationResponse(
+	            username,
+	            "Student account created successfully. Temporary password is "+tempPassword
+	    );
+        
+	}
+	
+	private String defaultIfNull(String value) {
+	    return value == null ? "" : value;
+	}
+	
 	  /**
      * Retrieve the profile for the given username.
      *
@@ -107,10 +133,41 @@ public class UserService implements IUserService {
      * @throws RuntimeException if the user cannot be found or another retrieval error occurs
      */
 	@Override
-    public UserProfile getProfile(String username) {
-        User user = userRepo.findByUsername(username).orElseThrow();
-        return user.getProfile();
-    }
+	@Transactional
+	public UserProfileResponse getProfile(String username) {
+	    User user = userRepo.findByUsername(username)
+	            .orElseThrow(() -> new RuntimeException("User not found"));
+
+	    UserProfile profile = user.getProfile();
+
+	    // If profile doesn't exist, create empty one
+	    if (profile == null) {
+	        profile = new UserProfile();
+	        profile.setUser(user);
+	        profileRepo.save(profile);
+	    }
+
+	    // Pick first role (assuming one primary role)
+	    String primaryRole = user.getRoles()
+	            .stream()
+	            .findFirst()
+	            .map(Role::getRoleName)
+	            .orElse("UNKNOWN");
+
+	    // Convert to DTO with null-safety
+	    return new UserProfileResponse(
+	        user.getUid(),
+	        user.getUsername(),
+	        user.getEmail(),
+	        primaryRole,
+
+	        defaultIfNull(profile.getFullName()),
+	        defaultIfNull(profile.getDepartment()),
+	        defaultIfNull(profile.getPhone()),
+	        defaultIfNull(profile.getPhotoUrl()),
+	        defaultIfNull(profile.getYearOfStudy())
+	    );
+	}
 
 	/**
      * Update the profile of the specified user.
@@ -131,10 +188,15 @@ public class UserService implements IUserService {
     public String updateProfile(String username, UpdateProfileRequest req) {
         User user = userRepo.findByUsername(username)
             .orElseThrow(() -> new RuntimeException("User not found"));
-        UserProfile profile = profileRepo.findByUser(user)
-            .orElse(new UserProfile());
         
-        profile.setUser(user);
+        UserProfile profile = profileRepo.findByUser(user)
+                .orElseGet(() -> {
+                    UserProfile p = new UserProfile();
+                    p.setUser(user);  // REQUIRED for shared PK
+                    return p;
+                });
+        
+        //profile.setUser(user);
         profile.setFullName(req.getFullName());
         profile.setPhone(req.getPhone());
         profile.setDepartment(req.getDepartment());

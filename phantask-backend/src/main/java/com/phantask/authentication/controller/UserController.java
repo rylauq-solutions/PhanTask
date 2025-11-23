@@ -1,20 +1,25 @@
 package com.phantask.authentication.controller;
 
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.phantask.authentication.dto.AccountCreationResponse;
 import com.phantask.authentication.dto.PasswordChangeRequest;
 import com.phantask.authentication.dto.RegisterRequest;
 import com.phantask.authentication.dto.UpdateProfileRequest;
-
-
+import com.phantask.authentication.dto.UserProfileResponse;
 import com.phantask.authentication.entity.UserProfile;
+import com.phantask.authentication.repository.UserRepository;
 import com.phantask.authentication.service.api.IUserService;
 import lombok.RequiredArgsConstructor;
 
@@ -36,7 +41,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserController {
     private final IUserService userService;
-
+    private final UserRepository userRepo;
     /**
      * Create a new student user.
      * 
@@ -45,9 +50,27 @@ public class UserController {
      *         400 Bad Request when the user-name already exists
      * @throws RuntimeException if the "STUDENT" role cannot be found in the database
      */
-    @PostMapping("/create-student")
-    public ResponseEntity<String> createAccount(@RequestBody RegisterRequest req) {
-        return ResponseEntity.ok(userService.createAccount(req.getEmail()));
+    @PostMapping("/create-account")
+    public ResponseEntity<?> createAccount(@RequestBody RegisterRequest req) {
+    	String email = req.getEmail();
+    	
+    	if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "Invalid email format")
+            );
+        }
+    	String baseUsername = email.substring(0, email.indexOf("@"));
+        String username = baseUsername;
+
+        // 3. Check if username exists → return 409
+        if (userRepo.existsByUsername(username)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                    Map.of("error", "Username already exists: " + username)
+            );
+        }
+        
+        AccountCreationResponse response = userService.createAccount(email);
+        return ResponseEntity.ok(response);
     }
     
     @PostMapping("/change-password-first-login")
@@ -62,7 +85,7 @@ public class UserController {
      * @return 200 OK with the {@link UserProfile} of the authenticated user
      */
     @GetMapping("/profile")
-    public ResponseEntity<UserProfile> getProfile(Authentication auth) {
+    public ResponseEntity<UserProfileResponse> getProfile(Authentication auth) {
         return ResponseEntity.ok(userService.getProfile(auth.getName()));
     }
 
@@ -73,7 +96,7 @@ public class UserController {
      * @param req  an {@link UpdateProfileRequest} containing profile fields to update
      * @return 200 OK with a message describing the result of the update operation
      */
-    @PostMapping("/update-profile")
+    @PutMapping("/update-profile")
     public ResponseEntity<String> updateProfile(
         Authentication auth,
         @RequestBody UpdateProfileRequest req
