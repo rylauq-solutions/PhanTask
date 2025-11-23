@@ -2,8 +2,7 @@ package com.phantask.authentication.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,19 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.phantask.authentication.dto.PasswordChangeRequest;
 import com.phantask.authentication.dto.RegisterRequest;
 import com.phantask.authentication.dto.UpdateProfileRequest;
-import com.phantask.authentication.entity.Role;
-import com.phantask.authentication.entity.User;
+
+
 import com.phantask.authentication.entity.UserProfile;
-import com.phantask.authentication.repository.RoleRepository;
-import com.phantask.authentication.repository.UserRepository;
+
 import com.phantask.authentication.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
 /**
- * REST controller that exposes user-related endpoints.
+ * REST controller that exposes user-related end-points.
  *
- * <p>Provides endpoints to:
+ * <p>Provides end-points to:
  * <ul>
  *   <li>Create a student account with a temporary password</li>
  *   <li>Retrieve the authenticated user's profile</li>
@@ -33,53 +31,30 @@ import lombok.RequiredArgsConstructor;
  *   <li>Change the authenticated user's password</li>
  * </ul>
  *
- * <p>All endpoints are prefixed with "/api/users".
+ * <p>All end-points are prefixed with "/api/users".
  */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final UserRepository userRepo;
-    private final RoleRepository roleRepo;
 
     /**
      * Create a new student user.
-     *
-     * <p>This method:
-     * <ol>
-     *   <li>Validates that the requested username does not already exist</li>
-     *   <li>Creates a new {@link User} with a default temporary password ("Temp@123")</li>
-     *   <li>Marks the user as enabled and forces a first-login password change</li>
-     *   <li>Assigns the role with name "STUDENT" to the created user</li>
-     * </ol>
-     *
-     * @param req a {@link RegisterRequest} containing username and email for the new student
+     * 
+     * @param req a {@link RegisterRequest} containing user-name and email for the new student
      * @return 200 OK with a success message and the temporary password when creation succeeds;
-     *         400 Bad Request when the username already exists
+     *         400 Bad Request when the user-name already exists
      * @throws RuntimeException if the "STUDENT" role cannot be found in the database
      */
     @PostMapping("/create-student")
-    public ResponseEntity<?> createStudent(@RequestBody RegisterRequest req) {
-        if (userRepo.existsByUsername(req.getUsername())) {
-            return ResponseEntity.badRequest().body("Username already exists");
-        }
-
-        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-
-        User user = new User();
-        user.setUsername(req.getUsername());
-        user.setEmail(req.getEmail());
-        user.setPassword(encoder.encode("Temp@123")); // default password
-        user.setEnabled(true);
-        user.setFirstLogin(true); // force password change on first login
-        userRepo.save(user);
-        Role studentRole = roleRepo.findByRoleName("STUDENT")
-                .orElseThrow(() -> new RuntimeException("Role STUDENT not found"));
-        user.getRoles().add(studentRole);
-
-        userRepo.save(user);
-        return ResponseEntity.ok("Student account created successfully. Temporary password: Temp@123");
+    public ResponseEntity<String> createStudent(@RequestBody RegisterRequest req) {
+        return ResponseEntity.ok(userService.createStudent(req.getEmail()));
+    }
+    
+    @PostMapping("/change-password-first-login")
+    public ResponseEntity<String> changePasswordFirstLogin(@RequestBody PasswordChangeRequest req) {
+        return ResponseEntity.ok(userService.changePasswordFirstLogin(req));
     }
 
     /**

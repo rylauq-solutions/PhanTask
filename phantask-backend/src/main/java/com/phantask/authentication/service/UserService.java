@@ -12,12 +12,15 @@ import org.springframework.stereotype.Service;
 
 import com.phantask.authentication.dto.PasswordChangeRequest;
 import com.phantask.authentication.dto.UpdateProfileRequest;
+import com.phantask.authentication.entity.Role;
 import com.phantask.authentication.entity.User;
 import com.phantask.authentication.entity.UserProfile;
+import com.phantask.authentication.repository.RoleRepository;
 import com.phantask.authentication.repository.UserProfileRepository;
 import com.phantask.authentication.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service that encapsulates user-related business logic.
@@ -32,11 +35,13 @@ import lombok.RequiredArgsConstructor;
  * <p>Keep security-sensitive behavior (password encoding, validation, audit logging)
  * inside this service and avoid exposing implementation details to controllers.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
 	 private final UserRepository userRepo;
+	 private final RoleRepository roleRepo;
 	 private final UserProfileRepository profileRepo;
 	 private final PasswordEncoder passwordEncoder;
 
@@ -59,6 +64,31 @@ public class UserService implements UserDetailsService {
         		        .map(r -> new SimpleGrantedAuthority("ROLE_" + r.getRoleName()))
         		        .collect(Collectors.toList())          
         );
+    }
+
+    public String createStudent(String email) {
+        if (email == null || !email.contains("@")) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+
+        String username = email.substring(0, email.indexOf("@"));
+        if (userRepo.existsByUsername(username)) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode("Temp@123"));
+        user.setEnabled(true);
+        user.setFirstLogin(true);
+
+        Role studentRole = roleRepo.findByRoleName("STUDENT")
+                .orElseThrow(() -> new RuntimeException("Role STUDENT not found"));
+        user.getRoles().add(studentRole);
+
+        userRepo.save(user);
+        return "Student account created successfully. Temporary password: Temp@123 and Username is: "+ username;
     }
 
 	  /**
@@ -158,7 +188,30 @@ public class UserService implements UserDetailsService {
                password.matches(".*[a-z].*") &&
                password.matches(".*\\d.*");
     }
+    
+    public String changePasswordFirstLogin(PasswordChangeRequest req) {
+        User user = userRepo.findByUsername(req.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        if (!passwordEncoder.matches(req.getOldPassword(), user.getPassword())) {
+            return "Old password is incorrect";
+        }
+        if (!isValidPassword(req.getNewPassword())) {
+            return "Password must be 8+ chars, contain upper, lower, digit";
+        }
+        // prevent same password
+        if (passwordEncoder.matches(req.getNewPassword(), user.getPassword())) {
+            return "New password cannot be same as old";
+        }
+        
+        log.info("Encoding and updating password for {}", req.getUsername());
+        user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+        user.setFirstLogin(false);
+        user.setPasswordChangedAt(LocalDateTime.now());
 
+        userRepo.save(user);
+        return "Password changed successfully";
+    }
 
 }
 
