@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import Login from './pages/login_signup/Login';
 import PrivateRoute from './components/PrivateRoute';
 import { Toaster } from 'react-hot-toast';
+import ForgotPassword from './components/login_signup_components/ForgotPassword';
 
 
 const App = () => {
@@ -21,6 +22,7 @@ const App = () => {
       <Routes>
         {/* Public route */}
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Private routes */}
         <Route

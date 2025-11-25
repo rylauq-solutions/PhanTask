@@ -111,7 +111,7 @@ const ChangePassword = () => {
                 <div className="flex w-full mb-2">
                     <button
                         type="button"
-                        className="w-[34%] bg-yellow-700 hover:bg-yellow-800 text-white font-semibold py-2 px-4 rounded-l-lg shadow transition-colors h-full disabled:opacity-50 flex items-center justify-center"
+                        className="hover:scale-100 transition-transform-colors duration-300 w-[34%] bg-yellow-700 hover:bg-yellow-800 text-white font-semibold py-2 px-4 rounded-l-lg shadow h-full disabled:opacity-50 flex items-center justify-center"
                         onClick={handleOTPRequest}
                         disabled={isOTPLoading || otpTimer > 0 || formData.oldPassword !== ""}
                     >
@@ -126,7 +126,6 @@ const ChangePassword = () => {
                         id="otp"
                         name="otp"
                         inputMode="numeric"
-                        pattern="\d*"
                         maxLength={6}
                         value={formData.otp}
                         onChange={handleChange}
@@ -197,14 +196,14 @@ const ChangePassword = () => {
             <div className="w-full flex gap-4 ">
                 <button
                     type="submit"
-                    className="flex-1 bg-red-700 hover:bg-red-800 text-white font-semibold py-2 rounded-lg shadow transition-colors"
+                    className="hover:scale-95 transition-transform-colors duration-300 flex-1 bg-red-700 hover:bg-red-800 text-white font-semibold py-2 rounded-lg shadow"
                 >
                     Submit
                 </button>
                 <button
                     type="button"
                     onClick={handleReset}
-                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 rounded-lg shadow transition-colors"
+                    className="hover:scale-95 transition-transform-colors duration-300 flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 rounded-lg shadow"
                 >
                     Reset
                 </button>

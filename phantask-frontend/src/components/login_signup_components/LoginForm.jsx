@@ -52,6 +52,11 @@ const LoginForm = ({ onLoginSuccess }) => {
     });
   };
 
+  // Handler for forgot password click
+  const handleForgotPasswordClick = () => {
+    navigate("/forgot-password");  // Navigate to forgot password route
+  };
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -87,22 +92,30 @@ const LoginForm = ({ onLoginSuccess }) => {
           value={formData.password}
           onChange={handleChange}
           placeholder="Enter password"
-          className="w-full mb-6 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
+          className="w-full mb-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
         />
+      </div>
+
+      {/* Forgot Password div */}
+      <div
+        onClick={handleForgotPasswordClick}
+        className="mb-6 pr-2 text-sm font-semibold text-red-700 cursor-pointer hover:underline select-none text-right"
+      >
+        Forgot Password?
       </div>
 
       {/* Submit and Reset Buttons */}
       <div className="w-full flex mb-1 gap-4 ">
         <button
           type="submit"
-          className="flex-1 bg-red-700 hover:bg-red-800 text-white font-semibold py-2 rounded-lg shadow transition-colors"
+          className="hover:scale-95 transition-transform-colors duration-300 flex-1 bg-red-700 hover:bg-red-800 text-white font-semibold py-2 rounded-lg shadow"
         >
           Login
         </button>
         <button
           type="button"
           onClick={handleReset}
-          className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 rounded-lg shadow transition-colors"
+          className="hover:scale-95 transition-transform-colors duration-300 flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 rounded-lg shadow"
         >
           Reset
         </button>
