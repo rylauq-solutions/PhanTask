@@ -16,22 +16,25 @@ import io.jsonwebtoken.security.Keys;
 /**
  * Utility helper for creating, parsing and validating JSON Web Tokens (JWT).
  *
- * <p>This component centralizes token-related logic such as:
+ * <p>
+ * This component centralizes token-related logic such as:
  * <ul>
  *   <li>Generating signed tokens containing user identity and claims</li>
  *   <li>Extracting username or other claims from an existing token</li>
  *   <li>Validating token expiration and signature</li>
  * </ul>
+ * </p>
  *
- * <p>Keep secret keys, expiration durations, and token formats configurable (e.g., via application.properties).
+ * <p>
+ * Keep secret keys, expiration durations, and token formats configurable (e.g.,
+ * via application.properties).
+ * </p>
  */
 @Component
 public class JwtUtil {
-	
-	private final long ACCESS_TOKEN_EXP = 1000 * 60 * 5; //5 minutes for testing
-    private final long REFRESH_TOKEN_EXP = 1000 * 60 * 6; //6 minutes for testing
 
-
+    private final long ACCESS_TOKEN_EXP = 1000 * 60 * 5;          // 5 minutes for testing
+    private final long REFRESH_TOKEN_EXP = 1000 * 60 * 60 * 12;   // 12 hours for testing
 
     @Value("${jwt.secret}")
     private String SECRET;
@@ -40,7 +43,7 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
-	/**
+    /**
      * Generate a JWT for the given username and claims.
      *
      * @param username the subject (typically username or user id)
@@ -48,27 +51,27 @@ public class JwtUtil {
      */
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
-            .setSubject(userDetails.getUsername())
-            .claim("roles", userDetails.getAuthorities()//if you want to check roles directly from the token without hitting the DB.
-                    .stream()
-                    .map(auth -> auth.getAuthority())
-                    .collect(Collectors.toList()))
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXP))
-            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-            .compact();
-    }
-    
-    public String generateRefreshToken(UserDetails userDetails) {
-        return Jwts.builder()
-            .setSubject(userDetails.getUsername())
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXP))
-            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-            .compact();
+                .setSubject(userDetails.getUsername())
+                .claim("roles", userDetails.getAuthorities()  // if you want to check roles directly from the token without hitting the DB.
+                        .stream()
+                        .map(auth -> auth.getAuthority())
+                        .collect(Collectors.toList()))
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXP))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
-	/**
+    public String generateRefreshToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXP))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /**
      * Extract the username (subject) from the JWT.
      *
      * @param token the JWT string
@@ -76,21 +79,21 @@ public class JwtUtil {
      */
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
-            .setSigningKey(getSigningKey())
-            .build()
-            .parseClaimsJws(token)
-            .getBody()
-            .getSubject();
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
-	 /**
+    /**
      * Validate the provided JWT string.
      *
      * @param token the JWT to validate
      * @return true if token is valid (signature and expiration), false otherwise
      */
     public boolean isTokenValid(String token, UserDetails userDetails) {
-    	try {
+        try {
             final String username = extractUsername(token);
             return username.equals(userDetails.getUsername()) && !isExpired(token);
         } catch (JwtException | IllegalArgumentException e) {
@@ -100,13 +103,11 @@ public class JwtUtil {
 
     private boolean isExpired(String token) {
         Date exp = Jwts.parserBuilder()
-            .setSigningKey(getSigningKey())
-            .build()
-            .parseClaimsJws(token)
-            .getBody()
-            .getExpiration();
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
         return exp.before(new Date());
     }
 }
-
-

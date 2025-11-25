@@ -8,22 +8,23 @@ import lombok.Data;
 /**
  * DTO used when registering a new user.
  *
- * <p>Contains the minimal information required to create a user account (username and email).
- * Validation annotations can be added if desired (e.g. @NotBlank, @Email).
+ * <p>
+ * Contains the minimal information required to create a user account (username
+ * and email). Validation annotations can be added if desired
+ * (e.g. @NotBlank, @Email).
+ * </p>
  */
 @Data
 public class RegisterRequest {
-	
 
-	@NotBlank(message = "Email is required")
-	@Email(message = "Invalid email address")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email address")
     private String email;
-	
-	@NotBlank(message = "Password is required")
+
+    @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
-	
-	@NotBlank(message = "Role is required")
-    private String role;  // ROLE_STUDENT, etc.
-}
 
+    @NotBlank(message = "Role is required")
+    private String role; // ROLE_STUDENT, etc.
+}

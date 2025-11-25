@@ -2,23 +2,20 @@
   "info": {
     "_postman_id": "c77381d5-14d6-4963-b138-f34eab4df786",
     "name": "phantask",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "44184877",
-    "_collection_link": "https://YOUR_NEW_NAME-8079341.postman.co/workspace/f9046b32-293f-4386-80f3-9aa20549c7aa/collection/44184877-c77381d5-14d6-4963-b138-f34eab4df786?action=share&source=collection_link&creator=44184877"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
       "name": "Authentication",
       "item": [
         {
-          "name": "Authenticate user and get token",
+          "name": "Login",
           "id": "10c97582-c0d0-4230-8bb8-b611b64d7f58",
           "request": {
             "auth": {
               "type": "noauth"
             },
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"Admin@123\"\r\n}",
@@ -41,8 +38,7 @@
                 "login"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Refresh authentication token",
@@ -53,7 +49,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{refresh_token}}",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc2MzkwNDMzNywiZXhwIjoxNzYzOTA0Njk3fQ.X7DEevvEXnrWVlhR-CB8k95U4dNr447MkAVkFT1lknA",
                   "type": "string"
                 }
               ]
@@ -80,8 +76,7 @@
                 "refresh-token"
               ]
             }
-          },
-          "response": []
+          }
         }
       ],
       "id": "4bfcd2f0-3135-4a9d-ba67-4351b4b6f5ed"
@@ -90,24 +85,23 @@
       "name": "Users",
       "item": [
         {
-          "name": "Create new student user with temporary pass",
-          "id": "e71b776e-72c5-44d4-a1b4-f30990ebd51b",
+          "name": "Create User",
+          "id": "3bf48f7e-b474-4e92-a04f-62d4fa0aacaa",
           "request": {
             "auth": {
               "type": "bearer",
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{jwt_token}}",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc2MzkwNTY3MCwiZXhwIjoxNzYzOTA1OTcwfQ.sSYW1JEYh1aacMPtXTsukVZq_s0HCT06rp2Cs5Fy-SE",
                   "type": "string"
                 }
               ]
             },
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"student3@example.com\"\r\n}",
+              "raw": "{\r\n    \"email\":\"student5@example.com\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -127,31 +121,70 @@
                 "create-student"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Retrieve authenticated user's profile",
-          "id": "6fbfed4d-d78b-4f9c-8a71-b2cf3cea4991",
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
+          "name": "Change Password",
+          "id": "6995d324-0f36-45a3-8448-8d68645a0955",
           "request": {
             "auth": {
               "type": "bearer",
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{jwt_token}}",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc2MzkwNjI4MiwiZXhwIjoxNzYzOTA2NTgyfQ.MG-zIz3aLWWpOFuRmKzmWo43SKF2nvtsxG43dhiBgUQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"oldPassword\":\"Administrato@1234\",\r\n    \"newPassword\":\"Admin@123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/users/change-password",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "users",
+                "change-password"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "id": "30cb17a2-d406-4ce5-8590-e0c1300a3c9b",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc2NDA3NDA3MiwiZXhwIjoxNzY0MDc0MzcyfQ.v1w7Fvnxmi9VrFBf273axYPhZEL6VPOwegnQxismWrI",
                   "type": "string"
                 }
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"username\": \"student1\",\r\n    \"email\": \"student1@example.com\"\r\n}"
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "http://localhost:8080/api/users/profile",
@@ -166,8 +199,7 @@
                 "profile"
               ]
             }
-          },
-          "response": []
+          }
         }
       ],
       "id": "5eafc407-c0d9-46e2-938b-bcde191b4ae4"

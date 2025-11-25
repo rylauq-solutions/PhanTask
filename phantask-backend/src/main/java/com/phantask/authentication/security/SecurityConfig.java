@@ -15,39 +15,44 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 /**
  * Central Spring Security configuration class.
  *
- * <p>Responsible for configuring authentication and authorization rules for the application.
- * Typical responsibilities include:
+ * <p>
+ * Responsible for configuring authentication and authorization rules for the
+ * application. Typical responsibilities include:
  * <ul>
- *   <li>Defining which endpoints are publicly accessible and which require authentication</li>
- *   <li>Registering authentication providers or UserDetailsService implementations</li>
- *   <li>Configuring HTTP security settings such as CSRF, CORS, session management, and filters</li>
+ *   <li>Defining which endpoints are publicly accessible and which require
+ *       authentication</li>
+ *   <li>Registering authentication providers or UserDetailsService
+ *       implementations</li>
+ *   <li>Configuring HTTP security settings such as CSRF, CORS, session
+ *       management, and filters</li>
  * </ul>
+ * </p>
  *
- * <p>Keep this class focused on wiring security components; business logic should remain in services.
+ * <p>
+ * Keep this class focused on wiring security components; business logic should
+ * remain in services.
+ * </p>
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
+
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // Allow registration & login
-                .requestMatchers("/api/users/change-password-first-login").permitAll() //Allow first-login change
-                .anyRequest().authenticated()               // Protect everything else
+                .requestMatchers("/api/users/change-password-first-login").permitAll() // Allow first-login change
+                .anyRequest().authenticated() // Protect everything else
             )
-            .sessionManagement(sess -> 
-                sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-	@Bean
-	AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    @Bean
+    AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
@@ -56,5 +61,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-
-

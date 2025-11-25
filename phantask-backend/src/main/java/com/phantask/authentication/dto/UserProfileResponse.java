@@ -1,5 +1,8 @@
 package com.phantask.authentication.dto;
 
+import java.time.LocalDateTime;
+import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,15 +12,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserProfileResponse {
 
-    private Long userId;
-    private String username;
-    private String email;
-    private String role;
+	private Long userId;
+	private String username;
+	private String email;
+	private String role;
 
-    private String fullName;
-    private String department;
-    private String phone;
-    private String photoUrl;
-    private String yearOfStudy;
+	private boolean enabled;
+	private boolean firstLogin;
+	private LocalDateTime passwordChangedAt;
+	private Set<String> roles; // To hold all roles' names
+
+	private String fullName;
+	private String department;
+	private String phone;
+	private String photoUrl;
+	private String yearOfStudy;
 }
-

@@ -5,7 +5,6 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,103 +20,105 @@ import com.phantask.authentication.dto.UserProfileResponse;
 import com.phantask.authentication.entity.UserProfile;
 import com.phantask.authentication.repository.UserRepository;
 import com.phantask.authentication.service.api.IUserService;
+
 import lombok.RequiredArgsConstructor;
 
 /**
  * REST controller that exposes user-related end-points.
  *
- * <p>Provides end-points to:
+ * <p>
+ * Provides end-points to:
  * <ul>
  *   <li>Create a student account with a temporary password</li>
  *   <li>Retrieve the authenticated user's profile</li>
  *   <li>Update the authenticated user's profile</li>
  *   <li>Change the authenticated user's password</li>
  * </ul>
+ * </p>
  *
- * <p>All end-points are prefixed with "/api/users".
+ * <p>
+ * All end-points are prefixed with "/api/users".
+ * </p>
  */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final IUserService userService;
-    private final UserRepository userRepo;
-    /**
-     * Create a new student user.
-     * 
-     * @param req a {@link RegisterRequest} containing user-name and email for the new student
-     * @return 200 OK with a success message and the temporary password when creation succeeds;
-     *         400 Bad Request when the user-name already exists
-     * @throws RuntimeException if the "STUDENT" role cannot be found in the database
-     */
-    @PostMapping("/create-account")
-    public ResponseEntity<?> createAccount(@RequestBody RegisterRequest req) {
-    	String email = req.getEmail();
-    	
-    	if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-            return ResponseEntity.badRequest().body(
-                    Map.of("error", "Invalid email format")
-            );
-        }
-    	String baseUsername = email.substring(0, email.indexOf("@"));
-        String username = baseUsername;
+	private final IUserService userService;
+	private final UserRepository userRepo;
 
-        // 3. Check if username exists → return 409
-        if (userRepo.existsByUsername(username)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                    Map.of("error", "Username already exists: " + username)
-            );
-        }
-        
-        AccountCreationResponse response = userService.createAccount(email);
-        return ResponseEntity.ok(response);
-    }
-    
-    @PostMapping("/change-password-first-login")
-    public ResponseEntity<String> changePasswordFirstLogin(@RequestBody PasswordChangeRequest req) {
-        return ResponseEntity.ok(userService.changePasswordFirstLogin(req));
-    }
+	/**
+	 * Create a new student user.
+	 *
+	 * @param req a {@link RegisterRequest} containing user-name and email for the
+	 *            new student
+	 * @return 200 OK with a success message and the temporary password when
+	 *         creation succeeds; 400 Bad Request when the user-name already exists
+	 * @throws RuntimeException if the "STUDENT" role cannot be found in the
+	 *                          database
+	 */
+	@PostMapping("/create-account")
+	public ResponseEntity<?> createAccount(@RequestBody RegisterRequest req) {
+		String email = req.getEmail();
 
-    /**
-     * Retrieve the profile of the currently authenticated user.
-     *
-     * @param auth the Spring Security {@link Authentication} object for the current request
-     * @return 200 OK with the {@link UserProfile} of the authenticated user
-     */
-    @GetMapping("/profile")
-    public ResponseEntity<UserProfileResponse> getProfile(Authentication auth) {
-        return ResponseEntity.ok(userService.getProfile(auth.getName()));
-    }
+		if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+			return ResponseEntity.badRequest().body(Map.of("error", "Invalid email format"));
+		}
+		String baseUsername = email.substring(0, email.indexOf("@"));
+		String username = baseUsername;
 
-    /**
-     * Update the profile for the currently authenticated user.
-     *
-     * @param auth the Spring Security {@link Authentication} object for the current request
-     * @param req  an {@link UpdateProfileRequest} containing profile fields to update
-     * @return 200 OK with a message describing the result of the update operation
-     */
-    @PutMapping("/update-profile")
-    public ResponseEntity<String> updateProfile(
-        Authentication auth,
-        @RequestBody UpdateProfileRequest req
-    ) {
-        return ResponseEntity.ok(userService.updateProfile(auth.getName(), req));
-    }
+		// Check if username exists → return 409
+		if (userRepo.existsByUsername(username)) {
+			return ResponseEntity.status(HttpStatus.CONFLICT)
+					.body(Map.of("error", "Username already exists: " + username));
+		}
 
-    /**
-     * Change the password for the currently authenticated user.
-     *
-     * @param auth the Spring Security {@link Authentication} object for the current request
-     * @param req  a {@link PasswordChangeRequest} containing the old and new passwords
-     * @return 200 OK with a message describing the result of the password change
-     */
-    @PostMapping("/change-password")
-    public ResponseEntity<String> changePassword(
-        Authentication auth,
-        @RequestBody PasswordChangeRequest req
-    ) {
-        return ResponseEntity.ok(userService.changePassword(auth.getName(), req));
-    }
+		AccountCreationResponse response = userService.createAccount(email);
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/change-password-first-login")
+	public ResponseEntity<String> changePasswordFirstLogin(@RequestBody PasswordChangeRequest req) {
+		return ResponseEntity.ok(userService.changePasswordFirstLogin(req));
+	}
+
+	/**
+	 * Retrieve the profile of the currently authenticated user.
+	 *
+	 * @param auth the Spring Security {@link Authentication} object for the current
+	 *             request
+	 * @return 200 OK with the {@link UserProfile} of the authenticated user
+	 */
+	@GetMapping("/profile")
+	public ResponseEntity<UserProfileResponse> getProfile(Authentication auth) {
+		return ResponseEntity.ok(userService.getProfile(auth.getName()));
+	}
+
+	/**
+	 * Update the profile for the currently authenticated user.
+	 *
+	 * @param auth the Spring Security {@link Authentication} object for the current
+	 *             request
+	 * @param req  an {@link UpdateProfileRequest} containing profile fields to
+	 *             update
+	 * @return 200 OK with a message describing the result of the update operation
+	 */
+	@PutMapping("/update-profile")
+	public ResponseEntity<String> updateProfile(Authentication auth, @RequestBody UpdateProfileRequest req) {
+		return ResponseEntity.ok(userService.updateProfile(auth.getName(), req));
+	}
+
+	/**
+	 * Change the password for the currently authenticated user.
+	 *
+	 * @param auth the Spring Security {@link Authentication} object for the current
+	 *             request
+	 * @param req  a {@link PasswordChangeRequest} containing the old and new
+	 *             passwords
+	 * @return 200 OK with a message describing the result of the password change
+	 */
+	@PostMapping("/change-password")
+	public ResponseEntity<String> changePassword(Authentication auth, @RequestBody PasswordChangeRequest req) {
+		return ResponseEntity.ok(userService.changePassword(auth.getName(), req));
+	}
 }
-
-

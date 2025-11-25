@@ -1,11 +1,13 @@
 package com.phantask.authentication.service.api;
 
 import java.util.Map;
+
 import com.phantask.authentication.dto.LoginRequest;
 
 public interface IAuthService {
-    Map<String, Object> login(LoginRequest req);
-    String logout(String authHeader);
-    String refreshToken(String refreshToken);
-}
+	Map<String, Object> login(LoginRequest req);
 
+	String logout(String authHeader);
+
+	String refreshToken(String refreshToken);
+}
