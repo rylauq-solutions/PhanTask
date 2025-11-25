@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { toast } from 'react-hot-toast';
 
 // ! ProfileDropDown: Dropdown menu for user profile/avatar menu (logout, profile, etc)
 const ProfileDropDown = ({ imageUrl }) => {
@@ -24,7 +25,10 @@ const ProfileDropDown = ({ imageUrl }) => {
   // * Handle user logout logic (! clears session and redirects)
   let handleLogout = () => {
     sessionStorage.clear();
-    window.location.reload();
+    toast.success("Logged out successfully!");
+    setTimeout(() => {
+      window.location.reload();
+    }, 500); // 0.5 seconds delay to show toast
   };
 
   // ! Main render: avatar button and animated dropdown menu
@@ -44,11 +48,10 @@ const ProfileDropDown = ({ imageUrl }) => {
 
       {/* * Dropdown popover with fade/scale animation */}
       <div
-        className={`absolute right-0 mt-2 w-28 bg-white border rounded-lg shadow-lg py-2 z-50 transform transition-all duration-200 ease-out origin-top ${
-          open
-            ? "opacity-100 scale-100 translate-y-0"
-            : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
-        }`}
+        className={`absolute right-0 mt-2 w-28 bg-white border rounded-lg shadow-lg py-2 z-50 transform transition-all duration-200 ease-out origin-top ${open
+          ? "opacity-100 scale-100 translate-y-0"
+          : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+          }`}
       >
         {/* * Profile navigation option (expand as needed) */}
         <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-orange-100 text-[#42260b]">
