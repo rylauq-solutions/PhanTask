@@ -11,11 +11,16 @@ const Login = () => {
     // Simulating backend firstLogin flag; default true for demo
     const [firstLogin, setFirstLogin] = useState(true);
 
+    // Track user email from login for ChangePassword
+    const [userEmail, setUserEmail] = useState("");
+
     // Track when user moves to change password form
     const [showChangePassword, setShowChangePassword] = useState(false);
 
-    // Called by LoginForm on successful login
-    const handleLoginSuccess = () => {
+    // Called by LoginForm on successful login - NOW receives email
+    const handleLoginSuccess = (email) => {
+        setUserEmail(email); // Store email for ChangePassword
+
         if (firstLogin) {
             setShowChangePassword(true);
         } else {
@@ -28,6 +33,7 @@ const Login = () => {
     const handlePasswordChanged = () => {
         setFirstLogin(false); // Simulate backend updating this flag
         setShowChangePassword(false);
+        setUserEmail(""); // Clear email after successful change
         navigate('/'); // Redirect to dashboard
     };
 
@@ -62,7 +68,10 @@ const Login = () => {
                     aria-label="Decorative or supplementary content"
                 >
                     {showChangePassword ? (
-                        <ChangePassword onPasswordChanged={handlePasswordChanged} />
+                        <ChangePassword
+                            onPasswordChanged={handlePasswordChanged}
+                            userEmail={userEmail} // Pass email to ChangePassword
+                        />
                     ) : (
                         <LoginForm onLoginSuccess={handleLoginSuccess} />
                     )}

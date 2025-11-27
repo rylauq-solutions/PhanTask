@@ -109,7 +109,10 @@ const ForgotPassword = () => {
                 onSubmit={handleSubmit}
                 className="w-full max-w-md h-auto bg-stone-100 bg-opacity-80 backdrop-blur-sm rounded-xl pt-4 pb-6 px-6 shadow-md flex flex-col"
             >
-                <h2 className="text-3xl font-bold text-amber-950 mb-6 text-center">Forgot Password</h2>
+                <h2 className="mb-6 flex items-center justify-center gap-4 text-center text-2xl sm:text-3xl font-bold text-amber-950">
+                    <i className="fa-solid fa-hand-point-left text-xl sm:text-2xl text-amber-950 cursor-pointer" onClick={() => { navigate('/login') }}></i>
+                    <span>Forgot Password</span>
+                </h2>
 
                 <div className="w-full">
                     {/* Email Field */}
