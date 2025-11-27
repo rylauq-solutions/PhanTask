@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-const Assignments = () => {
+const AssignedTasks = () => {
   const [file, setFile] = useState(null);
   const fileInputRef = useRef(null);
 
@@ -24,7 +24,7 @@ const Assignments = () => {
 
   return (
     <div className="w-full h-full rounded-xl border-2 border-[#3e1a17] bg-[#ffffff] p-4 shadow-lg shadow-orange-900/20 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:shadow-orange-900/30">
-      <h2 className="text-lg text-center font-semibold text-[#522320] mb-1 tracking-tight">Pending Assignments</h2>
+      <h2 className="text-lg text-center font-semibold text-[#522320] mb-1 tracking-tight">Pending Tasks</h2>
       <p className="text-xs font-medium text-center text-[#a67c61] mb-3">Submit before due date</p>
       {!file ? (
         <>
@@ -65,4 +65,4 @@ const Assignments = () => {
   )
 }
 
-export default Assignments;
+export default AssignedTasks;

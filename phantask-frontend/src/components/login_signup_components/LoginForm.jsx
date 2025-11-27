@@ -25,6 +25,11 @@ const LoginForm = ({ onLoginSuccess }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (!formData.email) {
+      toast.error("Please enter your email to login.");
+      return;
+    }
+
     if (!formData.password) {
       toast.error("Please enter your password to login.");
       return;
@@ -36,8 +41,9 @@ const LoginForm = ({ onLoginSuccess }) => {
     if (loginSuccessful) {
       toast.success("Login successful!");
       sessionStorage.setItem("authToken", "open");
+      // Pass email to parent handler for further use
       if (onLoginSuccess) {
-        onLoginSuccess();  // Notify parent to switch view
+        onLoginSuccess(formData.email);
       }
     } else {
       toast.error("Login failed. Check your credentials.");
@@ -54,7 +60,7 @@ const LoginForm = ({ onLoginSuccess }) => {
 
   // Handler for forgot password click
   const handleForgotPasswordClick = () => {
-    navigate("/forgot-password");  // Navigate to forgot password route
+    navigate("/forgot-password"); // Navigate to forgot password route
   };
 
   return (

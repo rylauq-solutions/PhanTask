@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import AssignmentCard from "../components/dashboard_cards/AssignmentCard";
 import AttendanceCard from "../components/dashboard_cards/AttendanceCard";
-import UpcomingClassesCard from "../components/dashboard_cards/UpcomingClassesCard";
 import SocialHighlightsCard from "../components/dashboard_cards/SocialHighlightsCard";
 import FocusReminderCard from "../components/dashboard_cards/FocusReminderCard";
 import NoticeBoardCard from "../components/dashboard_cards/NoticeBoardCard";
 import FeedbackSummaryCard from "../components/dashboard_cards/FeedbackSummaryCard";
+import AssignedTasksCard from "../components/dashboard_cards/AssignedTasksCard";
+import ScheduleCard from "../components/dashboard_cards/ScheduleCard.jsx";
 
 const Dashboard = () => {
   const [greeting, setGreeting] = useState("");
@@ -46,12 +46,12 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-3">
           {/* Left Column - Assignment & Social (spans 1 column) */}
           <div className="h-72">
-            <UpcomingClassesCard />
+            <ScheduleCard />
           </div>
 
           {/* Middle Column - Attendance (spans 1 column) */}
           <div className="h-72">
-            <AssignmentCard />
+            <AssignedTasksCard />
           </div>
 
           {/* Right Column - Focus Reminder (spans 1 column) */}

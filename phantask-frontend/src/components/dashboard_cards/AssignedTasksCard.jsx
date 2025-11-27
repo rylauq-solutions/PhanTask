@@ -1,20 +1,20 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
 
-const AssignmentCard = () => {
+const AssignedTasksCard = () => {
 
-    const assignments = [
-        { date: '02 Jul', subject: 'Biology' },
-        { date: '03 Jul', subject: 'Physics' },
-        { date: '04 Jul', subject: 'Chemistry' },
+    const assignedTasks = [
+        // { date: '02 Jul', subject: 'Biology' },
+        // { date: '03 Jul', subject: 'Physics' },
+        // { date: '04 Jul', subject: 'Chemistry' },
     ];
 
     return (
         <div className="w-full h-full rounded-xl border-2 border-[#522320] bg-[#ffffff] p-3 shadow-md shadow-[#522320]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#522320]/30 hover:-translate-y-0.5 flex flex-col">
             <span className='w-full h-full flex flex-col justify-between'>
-                <h2 className="h-10 text-lg font-semibold py-1 text-[#522320] text-center">Pending Assignments</h2>
+                <h2 className="h-10 text-lg font-semibold py-1 text-[#522320] text-center">Pending Tasks</h2>
 
-                {(assignments.length != 0) ?
+                {(assignedTasks.length != 0) ?
                     <main className='w-full overflow-y-auto'>
                         <table className="w-full border-collapse text-[#522320]">
                             <thead>
@@ -25,8 +25,8 @@ const AssignmentCard = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {assignments.map(({ date, subject }, idx) => (
-                                    <tr key={idx} className={`${idx !== assignments.length - 1 ? 'border-b border-[#c8a07e]' : ''}`}>
+                                {assignedTasks.map(({ date, subject }, idx) => (
+                                    <tr key={idx} className={`${idx !== assignedTasks.length - 1 ? 'border-b border-[#c8a07e]' : ''}`}>
                                         <td className="text-sm font-medium text-center py-2">{date}</td>
                                         <td className="text-sm font-medium text-center py-2">{subject}</td>
                                         <td className="text-center py-2">
@@ -39,13 +39,13 @@ const AssignmentCard = () => {
                             </tbody>
                         </table>
                     </main> :
-                    <main className='w-full h-full flex items-center justify-center'>
+                    <main className='w-full h-full flex items-center justify-center text-center'>
                         😀You are all caught up! <br />
-                        No Pending Assignments
+                        No Pending Tasks
                     </main>
                 }
 
-                {(assignments.length != 0) && <Link to={'/assignments'}>
+                {(assignedTasks.length != 0) && <Link to={'/assignedTasks'}>
                     <button className="w-full text-center hover:rounded-xl text-[#42260b] text-sm font-medium mt-1 py-2 hover:bg-red-100">
                         View all
                     </button>
@@ -55,4 +55,4 @@ const AssignmentCard = () => {
     )
 }
 
-export default AssignmentCard
+export default AssignedTasksCard

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const UpcomingClassesCard = () => {
-    const classes = [
+const ScheduleCard = () => {
+    const schedule = [
         { date: '28 Oct', subject: 'ADS using Java', time: '8:00 am' },
         { date: '28 Oct', subject: 'ADS Lab', time: '1:30 pm' },
         { date: '28 Oct', subject: 'Aptitude', time: '6:30 pm' },
@@ -11,7 +11,7 @@ const UpcomingClassesCard = () => {
     return (
         <div className="w-full h-full rounded-xl border-2 border-[#522320] bg-[#ffffff] p-3 shadow-md shadow-[#522320]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#522320]/30 hover:-translate-y-0.5 flex flex-col">
             <span className='w-full h-full flex flex-col justify-between'>
-                <h2 className="h-10 text-lg font-semibold py-1 text-[#522320] text-center">Upcoming Classes</h2>
+                <h2 className="h-10 text-lg font-semibold py-1 text-[#522320] text-center">Schedule</h2>
 
                 <main className='w-full overflow-y-auto'>
                     <table className="w-full border-collapse text-[#522320]">
@@ -23,8 +23,8 @@ const UpcomingClassesCard = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {classes.map(({ date, subject }, idx) => (
-                                <tr key={idx} className={`${idx !== classes.length - 1 ? 'border-b border-[#c8a07e]' : ''}`}>
+                            {schedule.map(({ date, subject }, idx) => (
+                                <tr key={idx} className={`${idx !== schedule.length - 1 ? 'border-b border-[#c8a07e]' : ''}`}>
                                     <td className="text-sm font-medium text-center py-2">{date}</td>
                                     <td className="text-sm font-medium text-center py-2">{subject}</td>
                                     {/* <td className="text-center py-2">
@@ -46,4 +46,4 @@ const UpcomingClassesCard = () => {
     );
 };
 
-export default UpcomingClassesCard;
+export default ScheduleCard;

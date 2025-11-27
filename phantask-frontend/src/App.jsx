@@ -2,10 +2,8 @@ import React from 'react';
 import SideBar from './components/SideBar';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
-import Assignments from './pages/Assignments';
 import Attendance from './pages/Attendance';
 import SocialHub from './pages/SocialHub';
-import FocusZone from './pages/FocusZone';
 import Helpline from './pages/Helpline';
 import Feedback from './pages/Feedback';
 import Settings from './pages/Settings';
@@ -13,6 +11,8 @@ import Login from './pages/login_signup/Login';
 import PrivateRoute from './components/PrivateRoute';
 import { Toaster } from 'react-hot-toast';
 import ForgotPassword from './components/login_signup_components/ForgotPassword';
+import AssignedTasks from './pages/AssignedTasks';
+import Schedule from './pages/Schedule';
 
 
 const App = () => {
@@ -36,11 +36,11 @@ const App = () => {
           }
         />
         <Route
-          path="/assignments"
+          path="/tasks"
           element={
             <PrivateRoute>
               <SideBar>
-                <Assignments />
+                <AssignedTasks />
               </SideBar>
             </PrivateRoute>
           }
@@ -66,11 +66,11 @@ const App = () => {
           }
         />
         <Route
-          path="/focuszone"
+          path="/schedule"
           element={
             <PrivateRoute>
               <SideBar>
-                <FocusZone />
+                <Schedule />
               </SideBar>
             </PrivateRoute>
           }
