@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes confetti-fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+.animate-confetti-fade-out {
+    animation: confetti-fade-out 1s ease-out forwards;
+}

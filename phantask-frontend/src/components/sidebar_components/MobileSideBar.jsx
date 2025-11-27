@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from "react-router-dom";
 
-const MobileSideBar = ({ menuItems, isMobileOpen, setIsMobileOpen }) => {
+const MobileSideBar = ({ menuItems, isMobileOpen, setIsMobileOpen, onLogoClick }) => {
 
     return (
         <div className="md:hidden">
@@ -26,7 +26,9 @@ const MobileSideBar = ({ menuItems, isMobileOpen, setIsMobileOpen }) => {
                         src="/rectangular-logo.png"
                         alt="PhanTask Logo"
                         className="w-3/4"
+                        onClick={onLogoClick}
                     />
+
                     <button
                         onClick={() => setIsMobileOpen(false)}
                         className="text-[#FFEAEA] text-xl hover:text-[#FFD0D0] transition"

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link } from "react-router-dom";
 
 
-const DesktopSideBar = ({ menuItems }) => {
+const DesktopSideBar = ({ menuItems, onLogoClick }) => {
     const [isOpen, setIsOpen] = useState(true);
 
     return (
@@ -18,6 +18,7 @@ const DesktopSideBar = ({ menuItems }) => {
                             src="/rectangular-logo.png"
                             alt="PhanTask Logo"
                             className="w-3/4"
+                            onClick={onLogoClick}
                         />
 
                         <button
