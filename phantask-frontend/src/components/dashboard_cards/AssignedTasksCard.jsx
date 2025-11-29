@@ -1,13 +1,26 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useDashboard } from '../../context/DashboardContext'; // Add this import
+import LoadingSkeleton from '../LoadingSkeleton';
 
 const AssignedTasksCard = () => {
+    const { tasks, loading } = useDashboard(); // Get from Context
+    const [localLoading, setLocalLoading] = useState(true); // Local loading state
 
-    const assignedTasks = [
-        // { date: '02 Jul', subject: 'Biology' },
-        // { date: '03 Jul', subject: 'Physics' },
-        // { date: '04 Jul', subject: 'Chemistry' },
-    ];
+    // Simulate initial load (remove after Context works)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLocalLoading(false);
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    // Show loading skeleton
+    if (loading || localLoading) {
+        return <LoadingSkeleton rows={3} hasButton={true} />;
+    }
+
+    const assignedTasks = tasks || []; // Use Context data or fallback to empty
 
     return (
         <div className="w-full h-full rounded-xl border-2 border-[#522320] bg-[#ffffff] p-3 shadow-md shadow-[#522320]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#522320]/30 hover:-translate-y-0.5 flex flex-col">
@@ -25,8 +38,8 @@ const AssignedTasksCard = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {assignedTasks.map(({ date, subject }, idx) => (
-                                    <tr key={idx} className={`${idx !== assignedTasks.length - 1 ? 'border-b border-[#c8a07e]' : ''}`}>
+                                {assignedTasks.map(({ date, subject, id }, idx) => ( // Added id for key
+                                    <tr key={id || idx} className={`${idx !== assignedTasks.length - 1 ? 'border-b border-[#c8a07e]' : ''}`}>
                                         <td className="text-sm font-medium text-center py-2">{date}</td>
                                         <td className="text-sm font-medium text-center py-2">{subject}</td>
                                         <td className="text-center py-2">
@@ -39,10 +52,16 @@ const AssignedTasksCard = () => {
                             </tbody>
                         </table>
                     </main> :
-                    <main className='w-full h-full flex items-center justify-center text-center'>
-                        😀You are all caught up! <br />
-                        No Pending Tasks
+                    <main className='w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-[#fff9f8]/30 to-[#fff1f0]/20 rounded-xl border-[#522320]/20 shadow-sm'>
+                        <div className="w-14 h-14 bg-[#522320]/5 rounded-2xl flex items-center justify-center mb-3 shadow-md shadow-[#522320]/10">
+                            <span className="text-2xl">🎉</span>
+                        </div>
+                        <h3 className="text-xl font-bold text-[#522320] mb-1.5 leading-tight">All Caught Up!</h3>
+                        <p className="text-[#522320]/60 text-xs font-medium text-center leading-tight max-w-[140px]">
+                            No pending tasks.<br></br> Great work! 🚀
+                        </p>
                     </main>
+
                 }
 
                 {(assignedTasks.length != 0) && <Link to={'/assignedTasks'}>
@@ -55,4 +74,4 @@ const AssignedTasksCard = () => {
     )
 }
 
-export default AssignedTasksCard
+export default AssignedTasksCard;

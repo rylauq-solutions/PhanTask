@@ -1,20 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 import { toast } from "react-hot-toast";
+import { useApi } from "../../context/ApiContext";
 
-const ChangePassword = ({ onPasswordChanged, userEmail }) => {
-    const navigate = useNavigate();
-
-    const [isOTPLoading, setIsOTPLoading] = useState(false);
-    const [otpSent, setOtpSent] = useState(false);
-    const [otpTimer, setOtpTimer] = useState(0);
-
+const ChangePassword = ({ onPasswordChanged, username }) => {
+    const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         oldPassword: "",
-        otp: "",
         newPassword: "",
         confirmPassword: "",
     });
+    const api = useApi();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -24,41 +19,6 @@ const ChangePassword = ({ onPasswordChanged, userEmail }) => {
         }));
     };
 
-    const handleOTPRequest = () => {
-        if (!userEmail) {
-            toast.error("User email not available. Please login again.");
-            return;
-        }
-
-        if (otpSent && otpTimer > 0) {
-            toast.error("Please wait for timer to expire before resending OTP.");
-            return;
-        }
-
-        setIsOTPLoading(true);
-        setTimeout(() => {
-            toast.success(`OTP sent to ${userEmail}!`);
-            setOtpSent(true);
-            setOtpTimer(120);
-            setIsOTPLoading(false);
-        }, 1000);
-    };
-
-    useEffect(() => {
-        if (otpTimer === 0) return;
-
-        const interval = setInterval(() => {
-            setOtpTimer((prev) => {
-                if (prev <= 1) {
-                    clearInterval(interval);
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [otpTimer]);
-
     const validatePassword = (password) => {
         const minLength = 8;
         const hasUpper = /[A-Z]/.test(password);
@@ -66,17 +26,9 @@ const ChangePassword = ({ onPasswordChanged, userEmail }) => {
         return password.length >= minLength && hasUpper && hasNumber;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.oldPassword || !formData.otp) {
-            toast.error("Both Old Password and OTP are required.");
-            return;
-        }
-        if (!formData.newPassword || !formData.confirmPassword) {
-            toast.error("Please fill in new password and confirm password.");
-            return;
-        }
         if (formData.newPassword !== formData.confirmPassword) {
             toast.error("New password and confirm password do not match.");
             return;
@@ -85,35 +37,39 @@ const ChangePassword = ({ onPasswordChanged, userEmail }) => {
             toast.error("Password must be at least 8 characters long, with uppercase letters and numbers.");
             return;
         }
-
-        // TODO: Real API call with: { email: userEmail, oldPassword, otp, newPassword }
-        console.log("API Payload:", { email: userEmail, ...formData });
-
-        toast.success("Password changed successfully!");
-        setFormData({
-            oldPassword: "",
-            otp: "",
-            newPassword: "",
-            confirmPassword: "",
-        });
-        setOtpSent(false);
-        setOtpTimer(0);
-
-        if (onPasswordChanged) {
-            onPasswordChanged();
+        if (!username) {
+            toast.error("Username not available. Please login again.");
+            return;
         }
-        navigate("/");
+
+        setIsLoading(true);
+
+        try {
+            await api.changePasswordFirstLogin(formData.oldPassword, formData.newPassword, username);
+            toast.success("Password changed successfully!");
+
+            setFormData({
+                oldPassword: "",
+                newPassword: "",
+                confirmPassword: "",
+            });
+
+            if (onPasswordChanged) {
+                onPasswordChanged();
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Password change failed');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleReset = () => {
         setFormData({
             oldPassword: "",
-            otp: "",
             newPassword: "",
             confirmPassword: "",
         });
-        setOtpSent(false);
-        setOtpTimer(0);
     };
 
     return (
@@ -123,15 +79,6 @@ const ChangePassword = ({ onPasswordChanged, userEmail }) => {
         >
             <h2 className="text-3xl font-bold text-amber-950 mb-6 text-center">Change Password</h2>
 
-            {/* Show email for context */}
-            {userEmail && (
-                <div className="mb-4 px-3 py-2 bg-blue-100 border border-blue-300 rounded-lg text-xs sm:text-sm text-blue-800 text-center break-words max-w-full">
-                    <span className="font-medium">Verifying:</span> <span className="block sm:inline">{userEmail}</span>
-                </div>
-
-            )}
-
-            {/* Old Password Field */}
             <label htmlFor="oldPassword" className="block mb-1 font-semibold text-gray-800">
                 Old Password
             </label>
@@ -146,7 +93,6 @@ const ChangePassword = ({ onPasswordChanged, userEmail }) => {
                 required
             />
 
-            {/* New Password Field */}
             <label htmlFor="newPassword" className="block mb-1 font-semibold text-gray-800">
                 New Password
             </label>
@@ -156,12 +102,11 @@ const ChangePassword = ({ onPasswordChanged, userEmail }) => {
                 name="newPassword"
                 value={formData.newPassword}
                 onChange={handleChange}
-                placeholder="Enter new password"
+                placeholder="Enter new password (8+ chars, uppercase, number)"
                 className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
                 required
             />
 
-            {/* Confirm Password Field */}
             <label htmlFor="confirmPassword" className="block mb-1 font-semibold text-gray-800">
                 Confirm Password
             </label>
@@ -176,48 +121,13 @@ const ChangePassword = ({ onPasswordChanged, userEmail }) => {
                 required
             />
 
-            {/* OTP Block */}
-            <label htmlFor="otp" className="block mb-1 font-semibold text-gray-800">
-                OTP
-            </label>
-            <div className="flex w-full mb-6">
-                <button
-                    type="button"
-                    className="duration-300 w-[34%] 
-             bg-yellow-700 hover:bg-yellow-800 text-white font-semibold 
-             px-4 py-2 md:py-2.5 rounded-l-lg shadow disabled:opacity-50 
-             flex items-center justify-center text-xs sm:text-sm border border-gray-300 border-r-1 "
-                    onClick={handleOTPRequest}
-                    disabled={isOTPLoading || (otpSent && otpTimer > 0)}
-                >
-                    {otpSent && otpTimer > 0
-                        ? `Resend (${otpTimer}s)`
-                        : otpSent
-                            ? "Resend"
-                            : "Generate"}
-                </button>
-
-                <input
-                    type="text"
-                    id="otp"
-                    name="otp"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={formData.otp}
-                    onChange={handleChange}
-                    placeholder="Enter 6-digit OTP"
-                    className="w-[66%] px-4 py-2 border border-gray-300 border-l-0 rounded-r-lg focus:outline-none "
-                    required
-                />
-            </div>
-
-            {/* Submit and Reset Buttons */}
             <div className="w-full flex gap-4">
                 <button
                     type="submit"
-                    className="hover:scale-95 transition-transform-colors duration-300 flex-1 bg-red-700 hover:bg-red-800 text-white font-semibold py-2 rounded-lg shadow"
+                    disabled={isLoading}
+                    className="hover:scale-95 transition-transform-colors duration-300 flex-1 bg-red-700 hover:bg-red-800 text-white font-semibold py-2 rounded-lg shadow disabled:opacity-50"
                 >
-                    Submit
+                    {isLoading ? 'Updating...' : 'Submit'}
                 </button>
                 <button
                     type="button"
