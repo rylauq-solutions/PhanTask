@@ -1,148 +1,176 @@
 import React, { useEffect, useState } from "react";
-import { apiService } from "../services/api";
 import { toast } from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
+import mascot from "../assets/Mascot-Phantask.png";
 import LoadingSkeleton from "../components/LoadingSkeleton";
 
-const UserProfile = ({ onEdit }) => {
-    const [profile, setProfile] = useState(null);
-    const [loading, setLoading] = useState(true);
+// // Mock API service for demo
+// const apiService = {
+//     getUserProfile: () => Promise.resolve({
+//         // data: {
+//         //     username: "john.doe",
+//         //     email: "john.doe@example.com",
+//         //     role: "Student",
+//         //     roles: ["Student", "Team Member"],
+//         //     fullName: "John Doe",
+//         //     department: "Computer Science",
+//         //     phone: "+1 234 567 8900",
+//         //     yearOfStudy: "3rd Year",
+//         //     photoUrl: null
+//         // }
+//     })
+// };
 
-    useEffect(() => {
-        apiService
-            .getUserProfile()
-            .then((res) => setProfile(res.data))
-            .catch((err) => {
-                toast.error(err.response?.data?.message || "Failed to load profile");
-            })
-            .finally(() => setLoading(false));
-    }, []);
+
+const UserProfile = ({ onEdit }) => {
+    const { user, loading } = useAuth();
 
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-center">
-                    <LoadingSkeleton
-                        titleHeight="h-6"
-                        rows={6}
-                        rowHeight="h-5"
-                        hasButton={true}
-                        className="w-[90%] h-[90%] max-w-4xl"
-                    />
+                    <LoadingSkeleton />
                 </div>
             </div>
         );
     }
 
-    if (!profile) {
+    if (!user) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4">
-                <div className="max-w-7xl mx-auto flex items-center justify-center text-sm text-[#522320]">
-                    Unable to load profile.
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4 flex items-center justify-center">
+                <div className="w-full max-w-sm rounded-2xl bg-white/60 backdrop-blur-sm border border-[#E7B9AE] shadow-md shadow-[#522320]/20 p-8 text-center">
+                    <div className="mb-4">
+                        <i className="fa-solid fa-circle-exclamation text-5xl text-red-700"></i>
+                    </div>
+                    <h3 className="text-xl font-semibold text-amber-950 mb-2">
+                        Unable to Load Profile
+                    </h3>
+                    <p className="text-sm text-[#5b3627] mb-6">
+                        We couldn't retrieve your profile information.<br /> Please try again later.
+                    </p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4">
-            <div className="max-w-[90%] h-[90%] mx-auto flex items-center justify-center">
-                {/* Main profile card – similar feel to Login container */}
-                <section className="w-full h-full rounded-2xl bg-white/60 backdrop-blur-sm border border-[#E7B9AE] shadow-md shadow-[#522320]/20 px-5 sm:px-6 md:px-8 py-5 flex flex-col gap-4">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4">
+            <div className="max-w-4xl mx-auto flex items-center justify-center py-8">
+                {/* Main profile card */}
+                <section className="w-full rounded-2xl bg-white/60  border-2 border-[#522320] bg-[#ffffff] p-3 shadow-md shadow-[#522320]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#522320]/30 hover:-translate-y-0.5 px-5 sm:px-6 md:px-8 py-6 flex flex-col gap-6 relative">
+
                     {/* Header */}
-                    <header className="flex items-center justify-between gap-3">
-                        <div className="flex flex-col w-full">
-                            <h2 className="text-2xl text-center font-extrabold text-[#522320]">
+                    <header className="flex flex-col md:flex-row items-center md:justify-between gap-4">
+                        <div className="flex flex-col flex-1 text-center w-full">
+                            <h2 className="text-2xl md:text-3xl font-bold text-amber-950">
                                 My Profile
                             </h2>
-                            <p className="text-xs sm:text-sm text-center text-[#8c5c4a] mt-1">
+                            <p className="text-sm font-normal text-amber-950 mt-1">
                                 Manage your PhanTask account details.
                             </p>
                         </div>
-                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-[#FFD0D0] flex items-center justify-center text-lg font-bold text-[#662222]">
-                            {profile.username?.[0]?.toUpperCase() || "U"}
+                        <div className="h-16 w-16 md:absolute md:top-6 md:right-6 rounded-full border-2 border-orange-400 flex items-center justify-center flex-shrink-0">
+                            <img
+                                className="h-full w-full rounded-full object-cover"
+                                src={user.photoUrl || mascot}
+                                alt="profile"
+                            />
                         </div>
                     </header>
 
-                    {/* Content – flex, responsive like your login layout */}
-                    <div className="flex flex-col lg:flex-row gap-6 mt-2 text-sm text-[#522320]">
+                    {/* Content - Two Column Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-8 md:gap-y-4 text-base text-[#522320] pb-4 pt-2 border-t border-[#E7B9AE]/30">
                         {/* Left column */}
-                        <div className="flex-1 flex flex-col gap-2">
-                            <div>
-                                <span className="font-semibold text-[#3b1d18]">
-                                    Username:
-                                </span>{" "}
+                        <div className="space-y-4">
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Username
+                                </span>
                                 <span className="text-[#5b3627] break-all">
-                                    {profile.username}
+                                    {user.username}
                                 </span>
                             </div>
-                            <div>
-                                <span className="font-semibold text-[#3b1d18]">Email:</span>{" "}
+
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Email
+                                </span>
                                 <span className="text-[#5b3627] break-all">
-                                    {profile.email}
+                                    {user.email}
                                 </span>
                             </div>
-                            <div>
-                                <span className="font-semibold text-[#3b1d18]">
-                                    Primary role:
-                                </span>{" "}
-                                <span className="inline-flex items-center rounded-full bg-[#FCE0D6] px-2 py-0.5 text-[11px] font-medium text-[#8c432b]">
-                                    {profile.role}
+
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Primary Role
+                                </span>
+                                <span className="inline-flex items-center rounded-full bg-[#FCE0D6] px-2.5 py-1 text-xs font-medium text-[#8c432b]">
+                                    {user.role}
                                 </span>
                             </div>
-                            <div>
-                                <span className="font-semibold text-[#3b1d18]">
-                                    All roles:
-                                </span>{" "}
+
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    All Roles
+                                </span>
                                 <span className="text-[#5b3627]">
-                                    {Array.from(profile.roles || []).join(", ") || "N/A"}
+                                    {Array.from(user.roles || []).join(", ") || "N/A"}
                                 </span>
                             </div>
                         </div>
 
+                        {/* Separator for mobile - after first 4 fields */}
+                        <div className="md:hidden border-t border-[#E7B9AE]/30 my-2"></div>
+
                         {/* Right column */}
-                        <div className="flex-1 flex flex-col gap-2">
-                            <div>
-                                <span className="font-semibold text-[#3b1d18]">
-                                    Full name:
-                                </span>{" "}
+                        <div className="space-y-4">
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Full Name
+                                </span>
                                 <span className="text-[#5b3627]">
-                                    {profile.fullName || "Not set"}
+                                    {user.fullName || "N/A"}
                                 </span>
                             </div>
-                            <div>
-                                <span className="font-semibold text-[#3b1d18]">
-                                    Department:
-                                </span>{" "}
+
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Department
+                                </span>
                                 <span className="text-[#5b3627]">
-                                    {profile.department || "Not set"}
+                                    {user.department || "N/A"}
                                 </span>
                             </div>
-                            <div>
-                                <span className="font-semibold text-[#3b1d18]">Phone:</span>{" "}
+
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Phone
+                                </span>
                                 <span className="text-[#5b3627]">
-                                    {profile.phone || "Not set"}
+                                    {user.phone || "N/A"}
                                 </span>
                             </div>
-                            <div>
-                                <span className="font-semibold text-[#3b1d18]">
-                                    Year of study:
-                                </span>{" "}
+
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Year of Study
+                                </span>
                                 <span className="text-[#5b3627]">
-                                    {profile.yearOfStudy || "N/A"}
+                                    {user.yearOfStudy || "N/A"}
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Footer – Edit button */}
-                    <div className="mt-3 flex justify-end">
+                    {/* Footer – Edit button in bottom right */}
+                    <div className="flex justify-center md:justify-end pt-2 border-t border-[#E7B9AE]/30">
                         <button
                             type="button"
                             onClick={onEdit}
-                            className="inline-flex items-center gap-1 rounded-lg bg-[#992D2D] px-4 py-2 text-sm font-semibold text-[#FFEAEA] shadow-sm hover:bg-[#7d2323] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                            className="w-full md:w-auto hover:scale-95 transition-transform duration-300 bg-red-700 hover:bg-red-800 text-white font-semibold py-2.5 px-6 rounded-lg shadow flex items-center justify-center gap-2"
                         >
-                            <i className="fa-solid fa-pen" />
-                            <span>Edit details</span>
+                            <i className="fa-solid fa-pen"></i>
+                            <span>Edit Details</span>
                         </button>
                     </div>
                 </section>

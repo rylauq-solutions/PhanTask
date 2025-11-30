@@ -9,31 +9,184 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// AUTO-ADD TOKEN
-api.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem("authToken");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+// Decode JWT to get expiration time
+const getTokenExpiry = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.exp * 1000; // Convert to milliseconds
+  } catch (e) {
+    console.error("Failed to decode token:", e);
+    return null;
+  }
+};
 
-// AUTO-LOGOUT ON 401
+// Check if token is expired or expiring soon (within 1 minute)
+const shouldRefreshToken = (token) => {
+  if (!token) return false;
+
+  const expiry = getTokenExpiry(token);
+  if (!expiry) return false;
+
+  const timeUntilExpiry = expiry - Date.now();
+
+  // Already expired or expiring within 60 seconds
+  return timeUntilExpiry < 60000;
+};
+
+// REFRESH TOKEN LOGIC WITH PROPER PROMISE HANDLING
+let refreshPromise = null;
+
+const refreshAccessToken = async () => {
+  const refreshToken = sessionStorage.getItem("refreshToken");
+  console.log("Attempting token refresh...");
+
+  if (!refreshToken) {
+    console.error("No refresh token available");
+    return false;
+  }
+
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/refresh-token`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${refreshToken}` },
+      }
+    );
+
+    console.log("Token refreshed successfully");
+
+    const { token, refreshToken: newRefresh } = response.data;
+
+    if (!token) {
+      console.error("No token in refresh response");
+      return false;
+    }
+
+    sessionStorage.setItem("authToken", token);
+
+    if (newRefresh) {
+      sessionStorage.setItem("refreshToken", newRefresh);
+    }
+
+    return true;
+  } catch (e) {
+    console.error(
+      "Token refresh failed:",
+      e.response?.status,
+      e.response?.data
+    );
+
+    // If refresh token is invalid/expired, clear everything
+    if (e.response?.status === 401 || e.response?.status === 403) {
+      sessionStorage.clear();
+    }
+
+    return false;
+  }
+};
+
+// Wrapper to ensure only one refresh happens at a time
+const ensureValidToken = async () => {
+  const token = sessionStorage.getItem("authToken");
+
+  if (!shouldRefreshToken(token)) {
+    return true; // Token is still valid
+  }
+
+  // If already refreshing, wait for that to complete
+  if (refreshPromise) {
+    console.log("Waiting for existing refresh...");
+    return await refreshPromise;
+  }
+
+  // Start new refresh
+  console.log("Starting new token refresh...");
+  refreshPromise = refreshAccessToken().finally(() => {
+    refreshPromise = null; // Clear promise after completion
+  });
+
+  return await refreshPromise;
+};
+
+// REQUEST INTERCEPTOR: Ensure token is valid before request
+api.interceptors.request.use(
+  async (config) => {
+    const token = sessionStorage.getItem("authToken");
+
+    if (token) {
+      // Check and refresh if needed
+      const isValid = await ensureValidToken();
+
+      if (!isValid) {
+        // Token refresh failed, redirect to login
+        console.error("Failed to refresh token, redirecting to login");
+        sessionStorage.clear();
+        window.location.href = "/login?sessionExpired=true";
+        return Promise.reject(new axios.Cancel("Session expired"));
+      }
+
+      // Use the (possibly new) token
+      const currentToken = sessionStorage.getItem("authToken");
+      config.headers.Authorization = `Bearer ${currentToken}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// RESPONSE INTERCEPTOR: Handle 401 errors as backup
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Handle network errors
+    if (!error.response) {
+      return Promise.reject(error);
+    }
+
+    const status = error.response.status;
+    const isRefreshCall = originalRequest?.url?.includes("/auth/refresh-token");
+
+    // If 401 and not already retried and not the refresh call itself
+    if (status === 401 && !originalRequest._retry && !isRefreshCall) {
+      originalRequest._retry = true;
+
+      console.log("Received 401, attempting token refresh...");
+
+      const refreshed = await ensureValidToken();
+
+      if (refreshed) {
+        const newToken = sessionStorage.getItem("authToken");
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        console.log("Retrying request with new token");
+        return api(originalRequest);
+      } else {
+        console.error("Token refresh failed on 401");
+      }
+    }
+
+    // If still 401 or refresh failed, logout
+    if (status === 401) {
+      console.error("Authentication failed, logging out");
       sessionStorage.clear();
       window.location.href = "/login?sessionExpired=true";
     }
+
     return Promise.reject(error);
   }
 );
 
 export const apiService = {
-  // * AUTH - MATCHES BACKEND
+  // AUTH
   login: (username, password) =>
     api.post("/auth/login", { username, password }),
 
-  // PUBLIC ENDPOINT - Bypass token interceptor
+  // PUBLIC ENDPOINT (no interceptor)
   changePasswordFirstLogin: async (oldPassword, newPassword, username) => {
     const publicApi = axios.create({
       baseURL: API_BASE_URL,
@@ -46,13 +199,15 @@ export const apiService = {
     });
   },
 
+  refreshAccessToken,
+
   // USER INFO
   getCurrentUser: () => api.get("/auth/me"),
 
   // USER PROFILE
   getUserProfile: () => api.get("/users/profile"),
 
-  // * DASHBOARD DATA (protected - uses token)
+  // DASHBOARD
   getAssignedTasks: () => api.get("/tasks/assigned"),
   getAttendance: () => api.get("/attendance/current"),
   getSchedule: () => api.get("/schedule/today"),

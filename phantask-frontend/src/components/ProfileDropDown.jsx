@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect, use } from "react";
 import { toast } from 'react-hot-toast';
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 // ! ProfileDropDown: Dropdown menu for user profile/avatar menu (logout, profile, etc)
 const ProfileDropDown = ({ imageUrl }) => {
   // * Dropdown open/close state
   const [open, setOpen] = useState(false);
+  const { logout } = useAuth();
 
   // * Reference to dropdown wrapper (for outside click detection)
   const dropdownRef = useRef(null);
@@ -28,7 +30,7 @@ const ProfileDropDown = ({ imageUrl }) => {
 
   // * Handle user logout logic (! clears session and redirects)
   let handleLogout = () => {
-    sessionStorage.clear();
+    logout();
     toast.success("Logged out successfully!");
     setTimeout(() => {
       window.location.reload();

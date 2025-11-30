@@ -10,7 +10,7 @@ const ScheduleCard = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setLocalLoading(false);
-        }, 1000);
+        }, 500);
         return () => clearTimeout(timer);
     }, []);
 

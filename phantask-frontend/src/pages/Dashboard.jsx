@@ -6,11 +6,14 @@ import NoticeBoardCard from "../components/dashboard_cards/NoticeBoardCard";
 import FeedbackSummaryCard from "../components/dashboard_cards/FeedbackSummaryCard";
 import AssignedTasksCard from "../components/dashboard_cards/AssignedTasksCard";
 import ScheduleCard from "../components/dashboard_cards/ScheduleCard.jsx";
+import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
+  const { user } = useAuth();
+
   const [greeting, setGreeting] = useState("");
   const [currentDate, setCurrentDate] = useState("");
-  const userName = "Monika";
+  const userNameDisplay = user.fullName ? user.fullName.split(" ")[0] : ((user.username).charAt(0).toUpperCase() + (user.username).slice(1));
   const attendancePercentage = 80; // Example value for dynamic border color
 
 
@@ -37,7 +40,7 @@ const Dashboard = () => {
         {/* Header */}
         <div className="mb-3 bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100">
           <h1 className="text-2xl md:text-3xl font-bold text-amber-950">
-            {greeting}, {userName}!
+            {greeting}, {userNameDisplay}!
           </h1>
           <p className="text-xs md:text-sm text-amber-950 mt-1">{currentDate}</p>
         </div>

@@ -1,16 +1,27 @@
+// context/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { apiService } from "../services/api";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);      // { username, roles, ... }
+    const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const testToken = sessionStorage.getItem("testToken");
         if (testToken === "open") {
-            setUser({ username: "test-user", roles: ["TEST"] });
+            setUser({
+                username: "test-user",
+                email: "test@example.com",
+                role: "TEST",
+                roles: ["TEST", "Developer"],
+                fullName: "Test User",
+                department: "Testing Department",
+                phone: "+1 234 567 8900",
+                yearOfStudy: "N/A",
+                photoUrl: null
+            });
             setLoading(false);
             return;
         }
@@ -24,21 +35,27 @@ export const AuthProvider = ({ children }) => {
         apiService
             .getUserProfile()
             .then((res) => {
-                setUser(res.data); // UserProfileResponse
+                setUser(res.data);
             })
-            .catch(() => {
-                sessionStorage.clear();
+            .catch((err) => {
+                console.log(
+                    "getUserProfile failed",
+                    err?.config?.url,
+                    err.response?.status,
+                    err.response?.data
+                );
+                // IMPORTANT: do NOT clear sessionStorage here
+                // Only mark user as not loaded
                 setUser(null);
             })
             .finally(() => setLoading(false));
     }, []);
 
-
     const value = {
         user,
         loading,
         isAuthenticated: !!user,
-        setUser,    // Expose setUser to allow manual updates
+        setUser,
         logout: () => {
             sessionStorage.clear();
             setUser(null);

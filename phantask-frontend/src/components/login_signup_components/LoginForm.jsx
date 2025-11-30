@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useApi } from '../../context/ApiContext';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = ({ onLoginSuccess }) => {
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -28,12 +29,14 @@ const LoginForm = ({ onLoginSuccess }) => {
 
     try {
       const response = await api.login(formData.username, formData.password);
-      // console.log('API Response:', response.data);
+
+      // backend: { token, refreshToken, role, requirePasswordChange }
       const { token, refreshToken, role, requirePasswordChange } = response.data;
 
-      sessionStorage.setItem('authToken', token);
-      if (refreshToken) sessionStorage.setItem('refreshToken', refreshToken);
-      sessionStorage.setItem('userRole', JSON.stringify(role));
+      sessionStorage.setItem("authToken", token);
+      if (refreshToken) sessionStorage.setItem("refreshToken", refreshToken);
+      sessionStorage.setItem("userRole", JSON.stringify(role));
+
 
       toast.success('Login successful!');
 
@@ -47,6 +50,12 @@ const LoginForm = ({ onLoginSuccess }) => {
 
   const handleReset = () => {
     setFormData({ username: '', password: '' });
+  };
+
+  // Handler for forgot password click
+  const navigate = useNavigate();
+  const handleForgotPasswordClick = () => {
+    navigate("/forgot-password");  // Navigate to forgot password route
   };
 
   return (
@@ -79,9 +88,17 @@ const LoginForm = ({ onLoginSuccess }) => {
           value={formData.password}
           onChange={handleChange}
           placeholder="Enter password"
-          className="w-full mb-6 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
+          className="w-full mb-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
           required
         />
+      </div>
+
+      {/* Forgot Password div */}
+      <div
+        onClick={handleForgotPasswordClick}
+        className="mb-6 pr-2 text-sm font-semibold text-red-800 cursor-pointer hover:underline select-none text-right"
+      >
+        Forgot Password?
       </div>
 
       {/* Submit and Reset Buttons */}
