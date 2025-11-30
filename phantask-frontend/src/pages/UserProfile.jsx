@@ -53,11 +53,14 @@ const UserProfile = ({ onEdit }) => {
         );
     }
 
+    console.log(user);
+    
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4">
             <div className="max-w-4xl mx-auto flex items-center justify-center py-8">
                 {/* Main profile card */}
-                <section className="w-full rounded-2xl bg-white/60  border-2 border-[#522320] bg-[#ffffff] p-3 shadow-md shadow-[#522320]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#522320]/30 hover:-translate-y-0.5 px-5 sm:px-6 md:px-8 py-6 flex flex-col gap-6 relative">
+                <section className="w-full rounded-2xl border-2 border-[#522320] bg-[#ffffff]/40 p-3 shadow-md shadow-[#522320]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#522320]/30 hover:-translate-y-0.5 px-5 sm:px-6 md:px-8 py-6 flex flex-col gap-6 relative">
 
                     {/* Header */}
                     <header className="flex flex-col md:flex-row items-center md:justify-between gap-4">
@@ -82,7 +85,7 @@ const UserProfile = ({ onEdit }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-8 md:gap-y-4 text-base text-[#522320] pb-4 pt-2 border-t border-[#E7B9AE]/30">
                         {/* Left column */}
                         <div className="space-y-4">
-                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                            <div className="bg-white rounded-lg p-3 border border-[#E7B9AE]/80">
                                 <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
                                     Username
                                 </span>
@@ -105,7 +108,7 @@ const UserProfile = ({ onEdit }) => {
                                     Primary Role
                                 </span>
                                 <span className="inline-flex items-center rounded-full bg-[#FCE0D6] px-2.5 py-1 text-xs font-medium text-[#8c432b]">
-                                    {user.role}
+                                    {user.role || "N/A"}
                                 </span>
                             </div>
 

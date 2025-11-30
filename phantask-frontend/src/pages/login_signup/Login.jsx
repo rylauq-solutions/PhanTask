@@ -38,7 +38,7 @@ const Login = () => {
     // Handle successful password change
     const handlePasswordChanged = () => {
         setShowChangePassword(false);
-        navigate('/'); // Go to dashboard
+        navigate('/login'); // Go to dashboard
     };
 
     return (

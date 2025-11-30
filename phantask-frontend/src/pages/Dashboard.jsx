@@ -13,7 +13,7 @@ const Dashboard = () => {
 
   const [greeting, setGreeting] = useState("");
   const [currentDate, setCurrentDate] = useState("");
-  const userNameDisplay = user.fullName ? user.fullName.split(" ")[0] : ((user.username).charAt(0).toUpperCase() + (user.username).slice(1));
+  const userNameDisplay = user?.fullName ? user?.fullName.split(" ")[0] : ((user?.username)?.charAt(0).toUpperCase() + (user?.username).slice(1));
   const attendancePercentage = 80; // Example value for dynamic border color
 
 

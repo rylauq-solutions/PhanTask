@@ -33,9 +33,9 @@ const LoginForm = ({ onLoginSuccess }) => {
       // backend: { token, refreshToken, role, requirePasswordChange }
       const { token, refreshToken, role, requirePasswordChange } = response.data;
 
-      sessionStorage.setItem("authToken", token);
+      if (token) sessionStorage.setItem("authToken", token);
       if (refreshToken) sessionStorage.setItem("refreshToken", refreshToken);
-      sessionStorage.setItem("userRole", JSON.stringify(role));
+      if (role) sessionStorage.setItem("userRole", JSON.stringify(role));
 
 
       toast.success('Login successful!');

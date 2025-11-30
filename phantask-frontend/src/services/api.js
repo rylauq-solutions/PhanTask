@@ -12,8 +12,16 @@ const api = axios.create({
 // Decode JWT to get expiration time
 const getTokenExpiry = (token) => {
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.exp * 1000; // Convert to milliseconds
+    if (!token || typeof token !== "string") return null;
+
+    const parts = token.split(".");
+    if (parts.length !== 3) {
+      console.error("Token is not a valid JWT:", token);
+      return null;
+    }
+
+    const payload = JSON.parse(atob(parts[1]));
+    return payload.exp * 1000;
   } catch (e) {
     console.error("Failed to decode token:", e);
     return null;
