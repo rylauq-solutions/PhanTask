@@ -49,6 +49,9 @@ export const apiService = {
   // USER INFO
   getCurrentUser: () => api.get("/auth/me"),
 
+  // USER PROFILE
+  getUserProfile: () => api.get("/users/profile"),
+
   // * DASHBOARD DATA (protected - uses token)
   getAssignedTasks: () => api.get("/tasks/assigned"),
   getAttendance: () => api.get("/attendance/current"),

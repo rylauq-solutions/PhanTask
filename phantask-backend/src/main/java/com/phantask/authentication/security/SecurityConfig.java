@@ -39,7 +39,9 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        http
+        	.cors(cors -> {}) // enable CORS using CorsConfig
+        	.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // Allow registration & login
                 .requestMatchers("/api/users/change-password-first-login").permitAll() // Allow first-login change

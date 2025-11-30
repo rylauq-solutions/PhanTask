@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, use } from "react";
 import { toast } from 'react-hot-toast';
+import { useNavigate } from "react-router-dom";
 
 // ! ProfileDropDown: Dropdown menu for user profile/avatar menu (logout, profile, etc)
 const ProfileDropDown = ({ imageUrl }) => {
@@ -8,6 +9,9 @@ const ProfileDropDown = ({ imageUrl }) => {
 
   // * Reference to dropdown wrapper (for outside click detection)
   const dropdownRef = useRef(null);
+
+  // * Navigation hook
+  let navigate = useNavigate();
 
   // ! Detect and close dropdown if mouse clicks outside of dropdown area
   useEffect(() => {
@@ -54,7 +58,9 @@ const ProfileDropDown = ({ imageUrl }) => {
           }`}
       >
         {/* * Profile navigation option (expand as needed) */}
-        <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-orange-100 text-[#42260b]">
+        <button
+          className="w-full text-left px-4 py-2 rounded-lg hover:bg-orange-100 text-[#42260b]"
+          onClick={() => { navigate("/profile"); setOpen(false); }}>
           Profile
         </button>
         {/* ! Logout option uses attention color and triggers full logout */}
@@ -65,7 +71,7 @@ const ProfileDropDown = ({ imageUrl }) => {
           Logout
         </button>
       </div>
-    </div>
+    </div >
   );
 };
 

@@ -15,7 +15,6 @@ export const AuthProvider = ({ children }) => {
             return;
         }
 
-
         const token = sessionStorage.getItem("authToken");
         if (!token) {
             setLoading(false);
@@ -23,9 +22,9 @@ export const AuthProvider = ({ children }) => {
         }
 
         apiService
-            .getCurrentUser()
+            .getUserProfile()
             .then((res) => {
-                setUser(res.data);
+                setUser(res.data); // UserProfileResponse
             })
             .catch(() => {
                 sessionStorage.clear();
@@ -33,6 +32,7 @@ export const AuthProvider = ({ children }) => {
             })
             .finally(() => setLoading(false));
     }, []);
+
 
     const value = {
         user,

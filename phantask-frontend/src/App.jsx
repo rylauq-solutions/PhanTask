@@ -15,6 +15,7 @@ import AssignedTasks from './pages/AssignedTasks';
 import Schedule from './pages/Schedule';
 import { ApiProvider } from './context/ApiContext';
 import { AuthProvider } from './context/AuthContext';
+import UserProfile from './pages/UserProfile';
 
 
 const App = () => {
@@ -105,6 +106,16 @@ const App = () => {
                 <PrivateRoute>
                   <SideBar>
                     <Settings />
+                  </SideBar>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <SideBar>
+                    <UserProfile />
                   </SideBar>
                 </PrivateRoute>
               }
