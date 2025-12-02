@@ -72,7 +72,7 @@ const UserProfile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-8 md:gap-y-4 text-base text-[#522320] pb-4 pt-2 border-t border-[#E7B9AE]/30">
                         {/* Left column */}
                         <div className="space-y-4">
-                            <div className="bg-white rounded-lg p-3 border border-[#E7B9AE]/80">
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
                                 <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
                                     Username
                                 </span>
