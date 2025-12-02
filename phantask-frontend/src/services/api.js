@@ -209,9 +209,6 @@ export const apiService = {
 
   refreshAccessToken,
 
-  // USER INFO
-  getCurrentUser: () => api.get("/auth/me"),
-
   // USER PROFILE
   getUserProfile: () => api.get("/users/profile"),
 

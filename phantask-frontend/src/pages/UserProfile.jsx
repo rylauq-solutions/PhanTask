@@ -1,29 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
+import React, { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import mascot from "../assets/Mascot-Phantask.png";
 import LoadingSkeleton from "../components/LoadingSkeleton";
-
-// // Mock API service for demo
-// const apiService = {
-//     getUserProfile: () => Promise.resolve({
-//         // data: {
-//         //     username: "john.doe",
-//         //     email: "john.doe@example.com",
-//         //     role: "Student",
-//         //     roles: ["Student", "Team Member"],
-//         //     fullName: "John Doe",
-//         //     department: "Computer Science",
-//         //     phone: "+1 234 567 8900",
-//         //     yearOfStudy: "3rd Year",
-//         //     photoUrl: null
-//         // }
-//     })
-// };
-
+import { useLocation } from "react-router-dom";
 
 const UserProfile = ({ onEdit }) => {
-    const { user, loading } = useAuth();
+    const { user, loading, refreshProfile } = useAuth();
+    const location = useLocation();
+
+    useEffect(() => {
+        refreshProfile();
+    }, [location.pathname]);
 
     if (loading) {
         return (
@@ -53,8 +40,7 @@ const UserProfile = ({ onEdit }) => {
         );
     }
 
-    console.log(user);
-    
+    // console.log("Rendering UserProfile with user:", user);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4">
@@ -90,7 +76,7 @@ const UserProfile = ({ onEdit }) => {
                                     Username
                                 </span>
                                 <span className="text-[#5b3627] break-all">
-                                    {user.username}
+                                    {user.username || "N/A"}
                                 </span>
                             </div>
 
@@ -99,7 +85,7 @@ const UserProfile = ({ onEdit }) => {
                                     Email
                                 </span>
                                 <span className="text-[#5b3627] break-all">
-                                    {user.email}
+                                    {user.email || "N/A"}
                                 </span>
                             </div>
 
@@ -108,7 +94,7 @@ const UserProfile = ({ onEdit }) => {
                                     Primary Role
                                 </span>
                                 <span className="inline-flex items-center rounded-full bg-[#FCE0D6] px-2.5 py-1 text-xs font-medium text-[#8c432b]">
-                                    {user.role || "N/A"}
+                                    {user.role || (user.roles && user.roles.length > 0 ? user.roles[0] : "N/A")}
                                 </span>
                             </div>
 
@@ -117,7 +103,7 @@ const UserProfile = ({ onEdit }) => {
                                     All Roles
                                 </span>
                                 <span className="text-[#5b3627]">
-                                    {Array.from(user.roles || []).join(", ") || "N/A"}
+                                    {user.roles && user.roles.length > 0 ? user.roles.join(", ") : "N/A"}
                                 </span>
                             </div>
                         </div>

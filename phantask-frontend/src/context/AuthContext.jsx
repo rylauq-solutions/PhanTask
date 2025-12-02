@@ -1,59 +1,58 @@
-// context/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { apiService } from "../services/api";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-
-    // Read test token synchronously BEFORE any render
-    const testToken = sessionStorage.getItem("testToken");
-
-    // Instant user initialization here — BEFORE effect runs
-    const [user, setUser] = useState(
-        testToken === "open"
-            ? {
-                username: "test_user",
-                email: "test_user@example.com",
-                role: "TEST",
-                roles: ["TEST", "Developer"],
-                fullName: "Tester User",
-                department: "Testing Department",
-                phone: "+91 234 567 8900",
-                yearOfStudy: "N/A",
-                photoUrl: null
-            }
-            : null
+    const [user, setUser] = useState({
+        userId: 101,
+        username: "developer",
+        fullName: "Dev Tester",
+        email: "developer@example.com",
+        phone: "8888888888",
+        role: "DEVELOPER",
+        roles: ["DEVELOPER"],
+        department: "software",
+        photoUrl: "",
+        yearOfStudy: "",
+        enabled: true,
+        firstLogin: false,
+        passwordChangedAt: "2025-11-23T19:31:16.002822"
+    }
     );
+    const [loading, setLoading] = useState(true);
 
-    // For test mode, loading should immediately be false
-    const [loading, setLoading] = useState(testToken === "open" ? false : true);
-
-    useEffect(() => {
-        // Skip API call in test mode
-        if (testToken === "open") return;
-
+    // Function to refresh user profile
+    const refreshUserProfile = async () => {
         const token = sessionStorage.getItem("authToken");
+
         if (!token) {
+            // setUser(null);
             setLoading(false);
             return;
         }
 
-        apiService
-            .getUserProfile()
-            .then((res) => {
-                setUser(res.data);
-            })
-            .catch((err) => {
-                console.log(
-                    "getUserProfile failed",
-                    err?.config?.url,
-                    err.response?.status,
-                    err.response?.data
-                );
-                setUser(null);
-            })
-            .finally(() => setLoading(false));
+        try {
+            console.log("Fetching user profile...");
+            const res = await apiService.getUserProfile();
+            // console.log("Profile data received:", res.data);
+            setUser(res.data);
+        } catch (err) {
+            console.log(
+                "getUserProfile failed",
+                err?.config?.url,
+                err.response?.status,
+                err.response?.data
+            );
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Initial load
+    useEffect(() => {
+        refreshUserProfile();
     }, []);
 
     const value = {
@@ -61,6 +60,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         isAuthenticated: !!user,
         setUser,
+        refreshProfile: refreshUserProfile,
         logout: () => {
             sessionStorage.clear();
             setUser(null);

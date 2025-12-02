@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 const ProfileDropDown = ({ imageUrl }) => {
   // * Dropdown open/close state
   const [open, setOpen] = useState(false);
-  const { logout } = useAuth();
+  const { logout, refreshProfile } = useAuth();
 
   // * Reference to dropdown wrapper (for outside click detection)
   const dropdownRef = useRef(null);
@@ -62,7 +62,11 @@ const ProfileDropDown = ({ imageUrl }) => {
         {/* * Profile navigation option (expand as needed) */}
         <button
           className="w-full text-left px-4 py-2 rounded-lg hover:bg-orange-100 text-[#42260b]"
-          onClick={() => { navigate("/profile"); setOpen(false); }}>
+          onClick={() => {
+            refreshProfile();
+            navigate("/profile");
+            setOpen(false);
+          }}>
           Profile
         </button>
         {/* ! Logout option uses attention color and triggers full logout */}
