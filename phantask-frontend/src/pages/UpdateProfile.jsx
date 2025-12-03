@@ -28,49 +28,40 @@ const UserProfile = () => {
     const handleImageChange = (e) => {
         const selectedFile = e.target.files[0];
         if (selectedFile) {
+            const maxSize = 2 * 1024 * 1024; // 2 MB
+            if (selectedFile.size > maxSize) {
+                toast.error("File is too large. Maximum allowed size is 2 MB.");
+                return;
+            }
+
             setFile(selectedFile);
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewImage(reader.result);
-            };
+            reader.onloadend = () => setPreviewImage(reader.result);
             reader.readAsDataURL(selectedFile);
         }
     };
 
+    const handleResetProfilePic = () => {
+        setFile(null); // clears any selected file
+        setPreviewImage(null); // revert preview to default
+    };
+
+
     let navigate = useNavigate();
     const handleUpdateProfile = async () => {
         try {
-            let photoUrl = user.photoUrl;
+            const formDataToSend = new FormData();
+            formDataToSend.append("fullName", formData.fullName);
+            formDataToSend.append("department", formData.department);
+            formDataToSend.append("phone", formData.phone);
+            formDataToSend.append("yearOfStudy", formData.yearOfStudy);
 
-            // If user uploaded a new file, you might need to upload it first
-            // For simplicity, we assume backend can handle base64 or file object
+            // Append file only if user selected a new one
             if (file) {
-                const formDataFile = new FormData();
-                formDataFile.append("file", file);
-
-                // Replace with your file upload endpoint if separate
-                const uploadRes = await apiService.uploadProfilePicture
-                    ? await apiService.uploadProfilePicture(formDataFile)
-                    : null;
-
-                if (uploadRes && uploadRes.data?.url) {
-                    photoUrl = uploadRes.data.url;
-                } else {
-                    // Fallback: use preview as base64
-                    photoUrl = previewImage;
-                }
+                formDataToSend.append("profilePic", file);
             }
 
-            // Build update object
-            const updateData = {
-                fullName: formData.fullName,
-                department: formData.department,
-                phone: formData.phone,
-                yearOfStudy: formData.yearOfStudy,
-                photoUrl: "photoUrl",
-            };
-
-            await apiService.updateProfile(updateData);
+            await apiService.updateProfile(formDataToSend);
 
             // Refresh context to reflect changes immediately
             await refreshProfile();
@@ -83,7 +74,6 @@ const UserProfile = () => {
         }
     };
 
-
     // console.log("Rendering UserProfile with user:", user);
 
     return (
@@ -94,20 +84,35 @@ const UserProfile = () => {
 
                     {/* Header */}
                     <header className="flex flex-col md:flex-row items-center md:justify-between gap-4">
-                        <div className="flex flex-col flex-1 text-center w-full">
-                            <h2 className="text-2xl md:text-3xl font-bold text-amber-950">
-                                Edit Profile
-                            </h2>
-                            <p className="text-sm font-normal text-amber-950 mt-1">
-                                Manage your PhanTask account details.
-                            </p>
-                        </div>
+                        <div className="flex flex-col items-center w-full text-center px-4 sm:px-6">
+  {/* Title container */}
+  <div className="relative">
+    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-amber-950">
+      Edit Profile
+    </h2>
+
+    {/* Icon: positioned relative to the title */}
+    <i
+      className="fa-solid fa-hand-point-left text-lg sm:text-xl md:text-2xl text-amber-950 cursor-pointer absolute -left-8 sm:-left-10 md:-left-12 top-1/2 -translate-y-1/2"
+      onClick={() => navigate("/profile")}
+    ></i>
+  </div>
+
+  {/* Subtitle */}
+  <p className="text-sm sm:text-base font-normal text-amber-950 mt-2">
+    Manage your PhanTask account details.
+  </p>
+</div>
+
+
+
                         <div className="h-16 w-16 md:absolute md:top-6 md:right-6 rounded-full border-2 border-orange-400 flex items-center justify-center flex-shrink-0">
                             <img
-                                className="h-full w-full rounded-full object-cover"
-                                src={user.photoUrl || mascot}
+                                src={previewImage || user.profilePic || mascot}
                                 alt="profile"
+                                className="h-full w-full object-cover rounded-full"
                             />
+
                         </div>
                     </header>
 
@@ -212,16 +217,27 @@ const UserProfile = () => {
                             <img
                                 src={previewImage || user.photoUrl || mascot}
                                 alt="profile preview"
-                                className="h-full w-full object-cover"
+                                className="bg-white h-full w-full object-cover"
                             />
                         </div>
 
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className=" mt-2 block w-full text-sm text-[#5b3627] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-700 file:text-white hover:file:bg-red-800 hover:file:cursor-pointer cursor-pointer hover:file:scale-95 file:transition-transform file:duration-300"
-                        />
+                        <div className="w-full md:w-1/2 flex justify-around items-center mt-2">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                className="w-2/3 block text-sm text-[#5b3627] file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-700 file:text-white hover:file:bg-red-800 hover:file:cursor-pointer cursor-pointer hover:file:scale-95 file:transition-transform file:duration-300"
+                            />
+
+                            <button
+                                type="button"
+                                onClick={handleResetProfilePic}
+                                className="w-8 h-8 flex items-center justify-center rounded-2xl border-2 border-red-600 text-red-600 text-xl font-bold shadow-sm hover:bg-red-600 hover:text-white transition-all duration-300 hover:scale-95"
+                            >
+                                &times;
+                            </button>
+                        </div>
+
                     </div>
 
 
