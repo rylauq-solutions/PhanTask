@@ -1,6 +1,7 @@
 package com.phantask.authentication.service.impl;
 
 import java.time.LocalDate;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
@@ -148,9 +149,15 @@ public class UserService implements IUserService {
                 .map(Role::getRoleName)
                 .collect(Collectors.toSet());
 
+        String base64Pic = null;
+        if (profile.getProfilePic() != null) {
+            base64Pic = "data:image/png;base64," +
+                    java.util.Base64.getEncoder().encodeToString(profile.getProfilePic());
+        }
+      
         LocalDate dob = Optional.ofNullable(profile.getDob())
         		.orElse(LocalDate.of(1900, 1, 1));
-        
+
         return new UserProfileResponse(
                 user.getUid(),
                 user.getUsername(),
@@ -163,10 +170,9 @@ public class UserService implements IUserService {
                 defaultIfNull(profile.getFullName()),
                 defaultIfNull(profile.getDepartment()),
                 defaultIfNull(profile.getPhone()),
-                defaultIfNull(profile.getPhotoUrl()),
-                defaultIfNull(profile.getYearOfStudy()),
-                dob
-
+                base64Pic,   // FIELD for Profile Pic
+                defaultIfNull(profile.getYearOfStudy())    
+                dob     
         );
     }
 
@@ -200,7 +206,13 @@ public class UserService implements IUserService {
         profile.setFullName(req.getFullName());
         profile.setPhone(req.getPhone());
         profile.setDepartment(req.getDepartment());
-        profile.setPhotoUrl(req.getPhotoUrl());
+        if (req.getProfilePic() != null && !req.getProfilePic().isEmpty()) {
+            try {
+                profile.setProfilePic(req.getProfilePic().getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read profile picture", e);
+            }
+        }
         profile.setYearOfStudy(req.getYearOfStudy());
         profile.setDob(req.getDob());
         

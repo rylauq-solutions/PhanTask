@@ -9,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -37,49 +38,52 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserProfile {
 
-    /**
-     * Primary key for the profile.
-     */
-    @Id
-    private Long userId;
+	/**
+	 * Primary key for the profile.
+	 */
+	@Id
+	private Long userId;
 
-    /**
-     * The user that owns this profile.
-     *
-     * <p>
-     * Mapped as a bidirectional OneToOne with {@link User}. This field is typically
-     * the owning or inverse side depending on mapping; adjust {@code mappedBy} in
-     * User accordingly.
-     * </p>
-     */
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "uid")
-    @JsonManagedReference
-    private User user;
+	/**
+	 * The user that owns this profile.
+	 *
+	 * <p>
+	 * Mapped as a bidirectional OneToOne with {@link User}. This field is typically
+	 * the owning or inverse side depending on mapping; adjust {@code mappedBy} in
+	 * User accordingly.
+	 * </p>
+	 */
+	@OneToOne(fetch = FetchType.LAZY)
+	@MapsId
+	@JoinColumn(name = "uid")
+	@JsonManagedReference
+	private User user;
 
-    @Size(max = 255)
-    private String fullName;
+  @Size(max = 255)
+	private String fullName;
+  
+	@Column(name = "department")
+  private String department;
+
+  @Size(max = 20)
+	private String phone;
+
+	@Lob
+	@Column(name = "profile_pic", columnDefinition = "LONGBLOB")
+	private byte[] profilePic;
+
+  // New field for Date of Birth
+  @Past(message = "DOB must be in the past")
+  private LocalDate dob;
     
-    @Column(name = "department")
-    private String department;
+  @Column(name = "year_of_study")
+  private String yearOfStudy;
     
-    @Size(max = 20)
-    private String phone;
-    private String photoUrl;
-    
-    // New field for Date of Birth
-    @Past(message = "DOB must be in the past")
-    private LocalDate dob;
-    
-    @Column(name = "year_of_study")
-    private String yearOfStudy;
-    
-    //helper method
-    public void setUser(User user) {
-        this.user = user;
-        if (user.getProfile() != this) {
-            user.setProfile(this);
-        }
-    }
+  //helper method
+  public void setUser(User user) {
+     this.user = user;
+     if (user.getProfile() != this) {
+         user.setProfile(this);
+     }
+  }
 }

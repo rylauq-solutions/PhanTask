@@ -190,11 +190,20 @@ api.interceptors.response.use(
 );
 
 export const apiService = {
-  // AUTH
+  /* ---------------------------------
+   *     AUTHENTICATION
+   * --------------------------------- */
   login: (username, password) =>
     api.post("/auth/login", { username, password }),
 
-  // PUBLIC ENDPOINT (no interceptor)
+  /* ---------------------------------
+   *      TOKEN REFRESH
+   * --------------------------------- */
+  refreshAccessToken,
+
+  /* ---------------------------------
+   *      CHANGE PASSWORD ON FIRST LOGIN
+   * --------------------------------- */
   changePasswordFirstLogin: async (oldPassword, newPassword, username) => {
     const publicApi = axios.create({
       baseURL: API_BASE_URL,
@@ -207,19 +216,37 @@ export const apiService = {
     });
   },
 
-  refreshAccessToken,
-
-  // USER INFO
-  getCurrentUser: () => api.get("/auth/me"),
-
-  // USER PROFILE
+  /* ---------------------------------
+   *      USER PROFILE
+   * --------------------------------- */
   getUserProfile: () => api.get("/users/profile"),
+  updateProfile: (data) => api.put("/users/update-profile", data),
 
-  // DASHBOARD
-  getAssignedTasks: () => api.get("/tasks/assigned"),
+  /* ---------------------------------
+   *      DASHBOARD DATA
+   * --------------------------------- */
+  // getMyPendingTasks: () => api.get("/tasks/my/pending"), // Already defined below
   getAttendance: () => api.get("/attendance/current"),
   getSchedule: () => api.get("/schedule/today"),
   getNotices: () => api.get("/notices/active"),
+
+  /* ---------------------------------
+   *      TASK MANAGEMENT (ADMIN)
+   * --------------------------------- */
+  createTask: (taskData) => api.post("/tasks/admin/create", taskData),
+  updateTask: (taskId, taskData) =>
+    api.put(`/tasks/admin/update/${taskId}`, taskData),
+  deleteTask: (taskId) => api.delete(`/tasks/admin/delete/${taskId}`),
+  getAllTasks: () => api.get("/tasks/admin/all"),
+
+  /* ---------------------------------
+   *      TASK MANAGEMENT (USER)
+   * --------------------------------- */
+  getMyTasks: () => api.get("/tasks/my"),
+  getMyPendingTasks: () => api.get("/tasks/my/pending"),
+  getMySubmittedTasks: () => api.get("/tasks/my/submitted"),
+  submitTask: (taskId, driveUrl) =>
+    api.put(`/tasks/my/submit/${taskId}`, { driveUrl }),
 };
 
 export default api;

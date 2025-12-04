@@ -1,29 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
+import React from "react";
 import { useAuth } from "../context/AuthContext";
 import mascot from "../assets/Mascot-Phantask.png";
 import LoadingSkeleton from "../components/LoadingSkeleton";
+import { useNavigate } from "react-router-dom";
 
-// // Mock API service for demo
-// const apiService = {
-//     getUserProfile: () => Promise.resolve({
-//         // data: {
-//         //     username: "john.doe",
-//         //     email: "john.doe@example.com",
-//         //     role: "Student",
-//         //     roles: ["Student", "Team Member"],
-//         //     fullName: "John Doe",
-//         //     department: "Computer Science",
-//         //     phone: "+1 234 567 8900",
-//         //     yearOfStudy: "3rd Year",
-//         //     photoUrl: null
-//         // }
-//     })
-// };
-
-
-const UserProfile = ({ onEdit }) => {
+const UserProfile = () => {
     const { user, loading } = useAuth();
+    const navigate = useNavigate();
 
     if (loading) {
         return (
@@ -53,13 +36,9 @@ const UserProfile = ({ onEdit }) => {
         );
     }
 
-    console.log(user);
-    
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4">
             <div className="max-w-4xl mx-auto flex items-center justify-center py-8">
-                {/* Main profile card */}
                 <section className="w-full rounded-2xl border-2 border-[#522320] bg-[#ffffff]/40 p-3 shadow-md shadow-[#522320]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#522320]/30 hover:-translate-y-0.5 px-5 sm:px-6 md:px-8 py-6 flex flex-col gap-6 relative">
 
                     {/* Header */}
@@ -75,101 +54,66 @@ const UserProfile = ({ onEdit }) => {
                         <div className="h-16 w-16 md:absolute md:top-6 md:right-6 rounded-full border-2 border-orange-400 flex items-center justify-center flex-shrink-0">
                             <img
                                 className="h-full w-full rounded-full object-cover"
-                                src={user.photoUrl || mascot}
+                                src={user.profilePic || mascot}
                                 alt="profile"
+                                onError={(e) => (e.target.src = mascot)}
                             />
                         </div>
                     </header>
 
-                    {/* Content - Two Column Grid */}
+                    {/* Content Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-8 md:gap-y-4 text-base text-[#522320] pb-4 pt-2 border-t border-[#E7B9AE]/30">
                         {/* Left column */}
                         <div className="space-y-4">
-                            <div className="bg-white rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
-                                    Username
-                                </span>
-                                <span className="text-[#5b3627] break-all">
-                                    {user.username}
-                                </span>
-                            </div>
-
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
-                                    Email
-                                </span>
-                                <span className="text-[#5b3627] break-all">
-                                    {user.email}
-                                </span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Username</span>
+                                <span className="text-[#5b3627] break-all">{user.username || "N/A"}</span>
                             </div>
-
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
-                                    Primary Role
-                                </span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Email</span>
+                                <span className="text-[#5b3627] break-all">{user.email || "N/A"}</span>
+                            </div>
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Primary Role</span>
                                 <span className="inline-flex items-center rounded-full bg-[#FCE0D6] px-2.5 py-1 text-xs font-medium text-[#8c432b]">
-                                    {user.role || "N/A"}
+                                    {user.role || (user.roles?.length > 0 ? user.roles[0] : "N/A")}
                                 </span>
                             </div>
-
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
-                                    All Roles
-                                </span>
-                                <span className="text-[#5b3627]">
-                                    {Array.from(user.roles || []).join(", ") || "N/A"}
-                                </span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">All Roles</span>
+                                <span className="text-[#5b3627]">{user.roles?.length > 0 ? user.roles.join(", ") : "N/A"}</span>
                             </div>
                         </div>
 
-                        {/* Separator for mobile - after first 4 fields */}
+                        {/* Mobile separator */}
                         <div className="md:hidden border-t border-[#E7B9AE]/30 my-2"></div>
 
                         {/* Right column */}
                         <div className="space-y-4">
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
-                                    Full Name
-                                </span>
-                                <span className="text-[#5b3627]">
-                                    {user.fullName || "N/A"}
-                                </span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Full Name</span>
+                                <span className="text-[#5b3627]">{user.fullName || "N/A"}</span>
                             </div>
-
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
-                                    Department
-                                </span>
-                                <span className="text-[#5b3627]">
-                                    {user.department || "N/A"}
-                                </span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Department</span>
+                                <span className="text-[#5b3627]">{user.department || "N/A"}</span>
                             </div>
-
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
-                                    Phone
-                                </span>
-                                <span className="text-[#5b3627]">
-                                    {user.phone || "N/A"}
-                                </span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Phone</span>
+                                <span className="text-[#5b3627]">{user.phone || "N/A"}</span>
                             </div>
-
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
-                                    Year of Study
-                                </span>
-                                <span className="text-[#5b3627]">
-                                    {user.yearOfStudy || "N/A"}
-                                </span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Year of Study</span>
+                                <span className="text-[#5b3627]">{user.yearOfStudy || "N/A"}</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Footer – Edit button in bottom right */}
+                    {/* Footer – Edit button */}
                     <div className="flex justify-center md:justify-end pt-2 border-t border-[#E7B9AE]/30">
                         <button
                             type="button"
-                            onClick={onEdit}
+                            onClick={() => navigate("/update-profile")}
                             className="w-full md:w-auto hover:scale-95 transition-transform duration-300 bg-red-700 hover:bg-red-800 text-white font-semibold py-2.5 px-6 rounded-lg shadow flex items-center justify-center gap-2"
                         >
                             <i className="fa-solid fa-pen"></i>

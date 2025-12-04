@@ -4,10 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 // ! ProfileDropDown: Dropdown menu for user profile/avatar menu (logout, profile, etc)
-const ProfileDropDown = ({ imageUrl }) => {
+const ProfileDropDown = ({ profilePic }) => {
   // * Dropdown open/close state
   const [open, setOpen] = useState(false);
-  const { logout } = useAuth();
+  const { logout, refreshProfile } = useAuth();
 
   // * Reference to dropdown wrapper (for outside click detection)
   const dropdownRef = useRef(null);
@@ -29,12 +29,9 @@ const ProfileDropDown = ({ imageUrl }) => {
   }, []);
 
   // * Handle user logout logic (! clears session and redirects)
-  let handleLogout = () => {
-    logout();
+  const handleLogout = () => {
+    logout(navigate);
     toast.success("Logged out successfully!");
-    setTimeout(() => {
-      window.location.reload();
-    }, 500); // 0.5 seconds delay to show toast
   };
 
   // ! Main render: avatar button and animated dropdown menu
@@ -46,7 +43,7 @@ const ProfileDropDown = ({ imageUrl }) => {
         className="rounded-full focus:shadow focus:shadow-yellow-400"
       >
         <img
-          src={imageUrl || "/default-avatar.png"}
+          src={profilePic || "/default-avatar.png"}
           alt="Profile"
           className="h-10 w-10 rounded-full border-2 bg-white border-[#d4b397] object-cover"
         />
@@ -62,7 +59,11 @@ const ProfileDropDown = ({ imageUrl }) => {
         {/* * Profile navigation option (expand as needed) */}
         <button
           className="w-full text-left px-4 py-2 rounded-lg hover:bg-orange-100 text-[#42260b]"
-          onClick={() => { navigate("/profile"); setOpen(false); }}>
+          onClick={() => {
+            refreshProfile();
+            navigate("/profile");
+            setOpen(false);
+          }}>
           Profile
         </button>
         {/* ! Logout option uses attention color and triggers full logout */}
