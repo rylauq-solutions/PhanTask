@@ -25,7 +25,7 @@ import com.phantask.task.service.TaskService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/tasks")
+@RequestMapping("/api/tasks")
 @RequiredArgsConstructor
 public class TaskController {
 
