@@ -1,8 +1,13 @@
 import React from 'react'
 import ProfileDropDown from '../ProfileDropDown';
 import Notification from "../Notification";
+import { useAuth } from "../../context/AuthContext";
+import mascot from "../../assets/Mascot-Phantask.png";
 
 const TopRightIcons = ({ isMobileOpen }) => {
+    const { user } = useAuth(); // Get user from context
+
+    // console.log(user);
 
     return (
         <div>
@@ -13,7 +18,7 @@ const TopRightIcons = ({ isMobileOpen }) => {
                     </div>
 
                     <div className="fixed top-3 right-5 z-50">
-                        <ProfileDropDown imageUrl="/phanpy.png" />
+                        <ProfileDropDown profilePic={user?.profilePic || mascot} />
                     </div>
                 </>
             )}

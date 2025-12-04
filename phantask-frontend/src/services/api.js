@@ -6,7 +6,6 @@ const API_BASE_URL =
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
-  headers: { "Content-Type": "application/json" },
 });
 
 // Decode JWT to get expiration time
@@ -211,7 +210,11 @@ export const apiService = {
 
   // USER PROFILE
   getUserProfile: () => api.get("/users/profile"),
-  updateProfile: (data) => api.put("/users/update-profile", data),
+  updateProfile: (formData) =>
+    api.post("/users/update-profile", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    }),
+
 
   // DASHBOARD
   getAssignedTasks: () => api.get("/tasks/assigned"),
