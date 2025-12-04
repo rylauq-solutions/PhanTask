@@ -1,5 +1,7 @@
 package com.phantask.authentication.entity;
 
+import java.time.LocalDate;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
@@ -11,6 +13,8 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -55,20 +59,31 @@ public class UserProfile {
 	@JsonManagedReference
 	private User user;
 
-	/**
-	 * User's given name.
-	 */
+  @Size(max = 255)
 	private String fullName;
-	private String department;
+  
+	@Column(name = "department")
+  private String department;
 
-	/**
-	 * Optional phone number for contact.
-	 */
+  @Size(max = 20)
 	private String phone;
 
 	@Lob
 	@Column(name = "profile_pic", columnDefinition = "LONGBLOB")
 	private byte[] profilePic;
 
-	private String yearOfStudy;
+  // New field for Date of Birth
+  @Past(message = "DOB must be in the past")
+  private LocalDate dob;
+    
+  @Column(name = "year_of_study")
+  private String yearOfStudy;
+    
+  //helper method
+  public void setUser(User user) {
+     this.user = user;
+     if (user.getProfile() != this) {
+         user.setProfile(this);
+     }
+  }
 }

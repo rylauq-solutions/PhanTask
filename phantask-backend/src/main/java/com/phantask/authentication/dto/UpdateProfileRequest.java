@@ -1,5 +1,8 @@
 package com.phantask.authentication.dto;
 
+import java.time.LocalDate;
+
+import jakarta.validation.constraints.Past;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.Data;
@@ -14,9 +17,11 @@ import lombok.Data;
  */
 @Data
 public class UpdateProfileRequest {
-	private String fullName;
-	private String department;
-	private String phone;
-	private MultipartFile profilePic;
-	private String yearOfStudy;
+    private String fullName;
+    private String department;
+    private String phone;
+    private MultipartFile profilePic;
+    private String yearOfStudy;
+    @Past(message = "DOB must be in the past")
+    private LocalDate dob;
 }
