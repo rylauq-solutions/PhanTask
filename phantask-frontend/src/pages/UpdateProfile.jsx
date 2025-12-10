@@ -13,7 +13,8 @@ const UserProfile = () => {
         fullName: user.fullName || "",
         department: user.department || "",
         phone: user.phone || "",
-        yearOfStudy: user.yearOfStudy || ""
+        yearOfStudy: user.yearOfStudy || "",
+        dob: user.dob || ""
     });
 
     const handleChange = (e) => {
@@ -55,7 +56,9 @@ const UserProfile = () => {
             formDataToSend.append("department", formData.department);
             formDataToSend.append("phone", formData.phone);
             formDataToSend.append("yearOfStudy", formData.yearOfStudy);
-
+            formDataToSend.append("dob", formData.dob || "");
+            console.log(formData.dob);
+            
             // Append file only if user selected a new one
             if (file) {
                 formDataToSend.append("profilePic", file);
@@ -76,6 +79,14 @@ const UserProfile = () => {
 
     // console.log("Rendering UserProfile with user:", user);
 
+    const formatDate = (dateStr) => {
+        if (!dateStr) return "-";
+        const d = new Date(dateStr);
+        return `${d.getDate().toString().padStart(2, "0")}-${(d.getMonth() + 1)
+            .toString()
+            .padStart(2, "0")}-${d.getFullYear()}`;
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4">
             <div className="max-w-4xl mx-auto flex items-center justify-center py-8">
@@ -85,24 +96,24 @@ const UserProfile = () => {
                     {/* Header */}
                     <header className="flex flex-col md:flex-row items-center md:justify-between gap-4">
                         <div className="flex flex-col items-center w-full text-center px-4 sm:px-6">
-  {/* Title container */}
-  <div className="relative">
-    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-amber-950">
-      Edit Profile
-    </h2>
+                            {/* Title container */}
+                            <div className="relative">
+                                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-amber-950">
+                                    Edit Profile
+                                </h2>
 
-    {/* Icon: positioned relative to the title */}
-    <i
-      className="fa-solid fa-hand-point-left text-lg sm:text-xl md:text-2xl text-amber-950 cursor-pointer absolute -left-8 sm:-left-10 md:-left-12 top-1/2 -translate-y-1/2"
-      onClick={() => navigate("/profile")}
-    ></i>
-  </div>
+                                {/* Icon: positioned relative to the title */}
+                                <i
+                                    className="fa-solid fa-hand-point-left text-lg sm:text-xl md:text-2xl text-amber-950 cursor-pointer absolute -left-8 sm:-left-10 md:-left-12 top-1/2 -translate-y-1/2"
+                                    onClick={() => navigate("/profile")}
+                                ></i>
+                            </div>
 
-  {/* Subtitle */}
-  <p className="text-sm sm:text-base font-normal text-amber-950 mt-2">
-    Manage your PhanTask account details.
-  </p>
-</div>
+                            {/* Subtitle */}
+                            <p className="text-sm sm:text-base font-normal text-amber-950 mt-2">
+                                Manage your PhanTask account details.
+                            </p>
+                        </div>
 
 
 
@@ -199,6 +210,18 @@ const UserProfile = () => {
                                     type="text"
                                     name="yearOfStudy"
                                     value={formData.yearOfStudy}
+                                    onChange={handleChange}
+                                    className="w-full bg-orange-50 border-2 outline-none focus:border-red-800 rounded-2xl px-3 py-1 text-[#5b3627]"
+                                    placeholder="Enter year of study"
+                                />
+                            </div>
+
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Date of Birth</span>
+                                <input
+                                    type="date"
+                                    name="dob"
+                                    value={formData.dob}
                                     onChange={handleChange}
                                     className="w-full bg-orange-50 border-2 outline-none focus:border-red-800 rounded-2xl px-3 py-1 text-[#5b3627]"
                                     placeholder="Enter year of study"

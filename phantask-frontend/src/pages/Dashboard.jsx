@@ -34,6 +34,9 @@ const Dashboard = () => {
     setCurrentDate(now.toLocaleDateString("en-US", options));
   }, []);
 
+  console.log(user);
+  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4">
       <div className="max-w-7xl mx-auto">

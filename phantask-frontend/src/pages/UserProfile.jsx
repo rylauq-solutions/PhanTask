@@ -36,6 +36,14 @@ const UserProfile = () => {
         );
     }
 
+    const formatDate = (dateStr) => {
+        if (!dateStr) return "-";
+        const d = new Date(dateStr);
+        return `${d.getDate().toString().padStart(2, "0")}-${(d.getMonth() + 1)
+            .toString()
+            .padStart(2, "0")}-${d.getFullYear()}`;
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4">
             <div className="max-w-4xl mx-auto flex items-center justify-center py-8">
@@ -74,6 +82,10 @@ const UserProfile = () => {
                                 <span className="text-[#5b3627] break-all">{user.email || "N/A"}</span>
                             </div>
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Department</span>
+                                <span className="text-[#5b3627]">{user.department || "N/A"}</span>
+                            </div>
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
                                 <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Primary Role</span>
                                 <span className="inline-flex items-center rounded-full bg-[#FCE0D6] px-2.5 py-1 text-xs font-medium text-[#8c432b]">
                                     {user.role || (user.roles?.length > 0 ? user.roles[0] : "N/A")}
@@ -95,8 +107,8 @@ const UserProfile = () => {
                                 <span className="text-[#5b3627]">{user.fullName || "N/A"}</span>
                             </div>
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Department</span>
-                                <span className="text-[#5b3627]">{user.department || "N/A"}</span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Date of Birth</span>
+                                <span className="text-[#5b3627]">{formatDate(user.dob) || "N/A"}</span>
                             </div>
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
                                 <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Phone</span>

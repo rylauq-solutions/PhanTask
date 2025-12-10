@@ -220,7 +220,10 @@ export const apiService = {
    *      USER PROFILE
    * --------------------------------- */
   getUserProfile: () => api.get("/users/profile"),
-  updateProfile: (data) => api.put("/users/update-profile", data),
+  updateProfile: (formData) =>
+    api.post("/users/update-profile", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
 
   /* ---------------------------------
    *      DASHBOARD DATA

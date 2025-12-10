@@ -82,7 +82,7 @@ public class AuthController {
 		try {
 			String refreshToken = authHeader.substring(7);
 			String newToken = authService.refreshToken(refreshToken);
-			return ResponseEntity.ok(Map.of("accessToken", newToken));
+			return ResponseEntity.ok(Map.of("token", newToken));
 		} catch (ExpiredJwtException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Refresh token has expired"));
 		} catch (JwtException ex) {
