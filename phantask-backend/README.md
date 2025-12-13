@@ -115,7 +115,7 @@ Title: Force a user to update their temporary password on first login.
 
 Actors:
 -------
-Primary Actor: Student / Admin (with temporary password)
+Primary Actor: User / Admin (with temporary password)
 
 Preconditions:
 --------------
@@ -163,7 +163,7 @@ Primary Actor: Admin
 
 Preconditions:
 --------------
-1.Admin is already registered and logged in.
+1.Admin account already exists and it is logged in.
 2.Admin has the required privileges to create other user's accounts.
 3.Role exists in the database.
 
@@ -236,10 +236,10 @@ Output1:
 --------
 {
   "userId": 2,
-  "username": "monika",
-  "email": "monika@gmail.com",
-  "role": "STUDENT",
-  "fullName": "Monika Pati",
+  "username": "amrita",
+  "email": "amrita@gmail.com",
+  "role": "HR MANAGER",
+  "fullName": "Amrita Patil",
   "department": "IT",
   "phone": "475767877",
   "photoUrl": "",
@@ -249,13 +249,113 @@ Output1:
 Output2:
 --------
 {
-  "userId": 2,
-  "username": "monika",
-  "email": "monika@gmail.com",
-  "role": "STUDENT",
+  "userId": 10,
+  "username": "alok",
+  "email": "alok@gmail.com",
+  "role": "TECH LEAD",
   "fullName": "",
   "department": "",
   "phone": "",
   "photoUrl": "",
   "yearOfStudy": ""
 }
+
+Use Case 6: Deactivate User
+---------------------------
+Title: Admin deactivates a user account
+
+Actors:
+-------
+Primary Actor: Admin
+
+Preconditions:
+---------------
+Admin is logged in with a valid JWT token.
+Admin has ADMIN authority.
+The target user exists and is currently active (enabled = true).
+
+Postconditions:
+---------------
+The target user account is marked as inactive (enabled = false).
+deactivatedAt timestamp is set to the current date/time.
+The user can no longer log in until reactivated.
+
+Description / Flow:
+-------------------
+Admin sends a PUT request to /api/users/{id}/deactivate.
+System verifies that the caller has ADMIN authority.
+System checks if the user with the given ID exists and is active.
+System updates the user entity:
+enabled = false
+deactivatedAt = LocalDateTime.now()
+System saves the updated user entity in the database.
+System returns a success message confirming deactivation.
+
+Execute request with curl:
+curl -v -X PUT http://localhost:8080/api/users/5/deactivate \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
+
+Output:
+-------
+{ "message": "User account deactivated successfully", "userId": 5 }
+
+Use Case 7: Get All Active Users
+--------------------------------
+Title: Admin retrieves all active users
+
+Actors:
+-------
+Primary Actor: Admin
+
+Preconditions:
+--------------
+Admin is logged in with a valid JWT token.
+Admin has ADMIN authority.
+
+Postconditions:
+---------------
+Returns a list of all users where enabled = true.
+Each user is represented as a UserResponse DTO with roles included.
+
+Description / Flow:
+-------------------
+Admin sends a GET request to /api/users/active.
+System verifies that the caller has ADMIN authority.
+System queries the database for all users with enabled = true.
+System converts each user entity to a UserResponse DTO:
+id, username, email, roles, enabled
+System returns the list of active users to the client.
+
+Execute request with curl:
+curl -v -X GET http://localhost:8080/api/users/active \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
+
+Output:
+-------
+   [{
+        "uid": 1,
+        "username": "bob",
+        "email": "bob@example.com",
+        "roles": [
+            "HR MANAGER"
+        ],
+        "enabled": true
+    },
+    {
+        "uid": 2,
+        "username": "admin",
+        "email": "admin@example.com",
+        "roles": [
+            "ADMIN"
+        ],
+        "enabled": true
+    },
+    {
+        "uid": 8,
+        "username": "newuser",
+        "email": "newuser@gmail.com",
+        "roles": [
+            "HR MANAGER"
+        ],
+        "enabled": true
+    }]
