@@ -155,7 +155,7 @@ Output:
 
 Use Case 4: Create Account
 -----------------------------------
-Title: Admin creates a new student account with a temporary password.
+Title: Admin creates a new account with a temporary password.
 
 Actors:
 -------
@@ -164,14 +164,14 @@ Primary Actor: Admin
 Preconditions:
 --------------
 1.Admin is already registered and logged in.
-2.Admin has the required privileges to create student accounts.
-3.Role STUDENT exists in the database.
+2.Admin has the required privileges to create other user's accounts.
+3.Role exists in the database.
 
 Postconditions:
 ---------------
-1.A new student account is created in the database.
+1.A new user account is created in the database.
 2.The account has a temporary password (Temp@123).
-3.firstLogin flag is set to true for the student.
+3.firstLogin flag is set to true for the user.
 
 Description / Flow:
 -------------------
@@ -187,14 +187,14 @@ Description / Flow:
 6.System returns a success message along with the temporary password.
 
 Execute request with curl:
-curl -v -X POST http://localhost:8080/api/users/create-student \
+curl -v -X POST http://localhost:8080/api/users/create-account \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..." \
--d '{ "email": "student01@example.com", "role":"HR" }'
+-d '{ "email": "newuser@example.com", "role":"HR" }'
 
 Output:
 -------
-"Student account created successfully. Username: student01, Temporary password: Temp@123"
+"Account created successfully. Username: newuser, Temporary password: Temp@123"
 
 Use Case 5: Get User's Profile
 ------------------------------
