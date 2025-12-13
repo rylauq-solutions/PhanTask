@@ -1,5 +1,8 @@
 package com.phantask.authentication.dto;
 
+import lombok.Getter;
+
+@Getter
 public class AccountCreationResponse {
 	private String username;
 	private String tempPasswordMessage;

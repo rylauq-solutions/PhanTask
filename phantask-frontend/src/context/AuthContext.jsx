@@ -1,74 +1,70 @@
-// context/AuthContext.jsx
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { apiService } from "../services/api";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    // Read test token synchronously BEFORE any render
-    const testToken = sessionStorage.getItem("testToken");
+  // Memoized function to refresh profile
+  const refreshProfile = useCallback(async () => {
+    const token = sessionStorage.getItem("authToken");
 
-    // Instant user initialization here — BEFORE effect runs
-    const [user, setUser] = useState(
-        testToken === "open"
-            ? {
-                username: "test_user",
-                email: "test_user@example.com",
-                role: "TEST",
-                roles: ["TEST", "Developer"],
-                fullName: "Tester User",
-                department: "Testing Department",
-                phone: "+91 234 567 8900",
-                yearOfStudy: "N/A",
-                photoUrl: null
-            }
-            : null
-    );
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
 
-    // For test mode, loading should immediately be false
-    const [loading, setLoading] = useState(testToken === "open" ? false : true);
+    try {
+      const res = await apiService.getUserProfile();
+      setUser(res.data);
+    } catch (err) {
+      console.error("Failed to fetch profile:", err);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    useEffect(() => {
-        // Skip API call in test mode
-        if (testToken === "open") return;
+  // Load profile once on mount
+  useEffect(() => {
+    refreshProfile();
+  }, [refreshProfile]);
 
-        const token = sessionStorage.getItem("authToken");
-        if (!token) {
-            setLoading(false);
-            return;
-        }
+  // LOGOUT function to clear session and user state
+  const logout = (navigate) => {
+    sessionStorage.clear();
+    setUser(null);
+    if (navigate) navigate("/login");
+  };
 
-        apiService
-            .getUserProfile()
-            .then((res) => {
-                setUser(res.data);
-            })
-            .catch((err) => {
-                console.log(
-                    "getUserProfile failed",
-                    err?.config?.url,
-                    err.response?.status,
-                    err.response?.data
-                );
-                setUser(null);
-            })
-            .finally(() => setLoading(false));
-    }, []);
+  // Final value object with role helpers included
+  const value = {
+    user,
+    loading,
+    isAuthenticated: !!user,
+    setUser,
 
-    const value = {
-        user,
-        loading,
-        isAuthenticated: !!user,
-        setUser,
-        logout: () => {
-            sessionStorage.clear();
-            setUser(null);
-            window.location.href = "/login";
-        },
-    };
+    refreshProfile, // memoized
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    // ROLE HELPERS
+    isAdmin: user?.roles?.includes("ADMIN"),
+    isHR: user?.roles?.includes("HR"),
+    isEmployee: user?.roles?.includes("EMPLOYEE"),
+    hasRole: (role) => user?.roles?.includes(role),
+
+    logout, // with navigate argument
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

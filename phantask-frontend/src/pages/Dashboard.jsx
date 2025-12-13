@@ -7,9 +7,12 @@ import FeedbackSummaryCard from "../components/dashboard_cards/FeedbackSummaryCa
 import AssignedTasksCard from "../components/dashboard_cards/AssignedTasksCard";
 import ScheduleCard from "../components/dashboard_cards/ScheduleCard.jsx";
 import { useAuth } from '../context/AuthContext';
+import PhanAI from "../components/PhanAI.jsx";
+import AdminCreateUser from "../components/dashboard_cards/CreateUserCard.jsx";
+import AdminTasksCard from "../components/dashboard_cards/CreateTasksCard.jsx";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   const [greeting, setGreeting] = useState("");
   const [currentDate, setCurrentDate] = useState("");
@@ -34,6 +37,9 @@ const Dashboard = () => {
     setCurrentDate(now.toLocaleDateString("en-US", options));
   }, []);
 
+  console.log(user);
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4">
       <div className="max-w-7xl mx-auto">
@@ -48,14 +54,16 @@ const Dashboard = () => {
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-3">
           {/* Left Column - Assignment & Social (spans 1 column) */}
-          <div className="h-72">
-            <ScheduleCard />
-          </div>
+          {isAdmin ?
+            <div className="h-72"><AdminCreateUser /></div> :
+            <div className="h-72"><ScheduleCard /></div>
+          }
 
           {/* Middle Column - Attendance (spans 1 column) */}
-          <div className="h-72">
-            <AssignedTasksCard />
-          </div>
+          {isAdmin ?
+            <div className="h-72"><AdminTasksCard /></div> :
+            <div className="h-72"><AssignedTasksCard /></div>
+          }
 
           {/* Right Column - Focus Reminder (spans 1 column) */}
           <div className="h-72">
@@ -83,7 +91,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-
+        <PhanAI />
       </div>
     </div>
   );
