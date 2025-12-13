@@ -34,7 +34,7 @@ public class TaskController {
 	// ----------------- ADMIN endpoints -----------------
 	// Admin or HR can create tasks
 	@PostMapping("/admin/create")
-	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_HR')")
+	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
 	public ResponseEntity<TaskResponse> createTask(@RequestBody AdminTaskDTO dto, Authentication auth) {
 		String admin = auth.getName();
 		TaskResponse resp = taskService.createTask(dto, admin);
@@ -42,14 +42,14 @@ public class TaskController {
 	}
 
 	@PutMapping("/admin/update/{id}")
-	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_HR')")
+	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
 	public ResponseEntity<TaskResponse> updateTask(@PathVariable Long id, @RequestBody AdminTaskDTO dto) {
 		TaskResponse resp = taskService.updateTask(id, dto);
 		return ResponseEntity.ok(resp);
 	}
 
 	@DeleteMapping("/admin/delete/{id}")
-	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_HR')")
+	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
 	public ResponseEntity<String> deleteTask(@PathVariable Long id) {
 		boolean deleted = taskService.deleteTask(id);
 
@@ -61,7 +61,7 @@ public class TaskController {
 	}
 
 	@GetMapping("/admin/all")
-	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_HR')")
+	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
 	public ResponseEntity<List<TaskResponse>> adminAll() {
 		return ResponseEntity.ok(taskService.getAllTasksAdmin());
 	}
