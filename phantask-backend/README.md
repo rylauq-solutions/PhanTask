@@ -175,14 +175,14 @@ Postconditions:
 
 Description / Flow:
 -------------------
-1.Admin sends a POST request to /api/users/create-account with the student’s email.
+1.Admin sends a POST request to /api/users/create-account with the user’s email and role-name.
 2.System checks if the username already exists.
 3.System creates a new User entity with:
   1.username from request
   2.Password set to Temp@123 (BCrypt encoded)
   3.enabled = true
   4.firstLogin = true
-4.System assigns the role STUDENT to the new user.
+4.System assigns the role to the new user.
 5.System saves the user in the database.
 6.System returns a success message along with the temporary password.
 
@@ -190,7 +190,7 @@ Execute request with curl:
 curl -v -X POST http://localhost:8080/api/users/create-student \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..." \
--d '{ "email": "student01@example.com" }'
+-d '{ "email": "student01@example.com", "role":"HR" }'
 
 Output:
 -------
