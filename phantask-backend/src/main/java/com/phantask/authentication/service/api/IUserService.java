@@ -9,7 +9,7 @@ import com.phantask.authentication.dto.UserProfileResponse;
 
 public interface IUserService extends UserDetailsService {
 
-	AccountCreationResponse createAccount(String email);
+	AccountCreationResponse createAccount(String email, String roleName);
 
 	UserProfileResponse getProfile(String username);
 

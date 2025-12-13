@@ -1,9 +1,9 @@
 package com.phantask.authentication.controller;
 
 import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,10 +18,9 @@ import com.phantask.authentication.dto.RegisterRequest;
 import com.phantask.authentication.dto.UpdateProfileRequest;
 import com.phantask.authentication.dto.UserProfileResponse;
 import com.phantask.authentication.entity.UserProfile;
-import com.phantask.authentication.repository.UserRepository;
 import com.phantask.authentication.service.api.IUserService;
-
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * REST controller that exposes user-related end-points.
@@ -40,13 +39,13 @@ import lombok.RequiredArgsConstructor;
  * All end-points are prefixed with "/api/users".
  * </p>
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 	private final IUserService userService;
-	private final UserRepository userRepo;
-
+	
 	/**
 	 * Create a new student user.
 	 *
@@ -57,6 +56,7 @@ public class UserController {
 	 * @throws RuntimeException if the "STUDENT" role cannot be found in the
 	 *                          database
 	 */
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/create-account")
 	public ResponseEntity<?> createAccount(@RequestBody RegisterRequest req) {
 		String email = req.getEmail();
@@ -64,17 +64,18 @@ public class UserController {
 		if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
 			return ResponseEntity.badRequest().body(Map.of("error", "Invalid email format"));
 		}
-		String baseUsername = email.substring(0, email.indexOf("@"));
-		String username = baseUsername;
+		
+		try {
+	        String role = req.getRole();
+	        AccountCreationResponse response = userService.createAccount(email, role);
+	        return ResponseEntity.ok(response);
 
-		// Check if username exists → return 409
-		if (userRepo.existsByUsername(username)) {
-			return ResponseEntity.status(HttpStatus.CONFLICT)
-					.body(Map.of("error", "Username already exists: " + username));
-		}
-
-		AccountCreationResponse response = userService.createAccount(email);
-		return ResponseEntity.ok(response);
+	    } catch (IllegalArgumentException ex) {
+	        return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+	    } catch (RuntimeException ex) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(Map.of("error", ex.getMessage()));
+	    }
 	}
 
 	@PostMapping("/change-password-first-login")

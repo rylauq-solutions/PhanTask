@@ -128,7 +128,7 @@ public class User implements UserDetails {
      * patterns.
      * </p>
      */
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "uid"), inverseJoinColumns = @JoinColumn(name = "rid"))
     private Set<Role> roles = new HashSet<>();
 

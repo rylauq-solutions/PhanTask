@@ -8,5 +8,8 @@ public class AccountCreationResponse {
 		this.username = username;
 		this.tempPasswordMessage = tempPasswordMessage;
 	}
+	
+	public String getUsername() { return username; }
+    public String getMessage() { return tempPasswordMessage; }
 
 }
