@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -62,14 +63,6 @@ public class UserService implements IUserService {
         User user = userRepo.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // DEBUG
-        System.out.println("Username: " + username);
-        System.out.println("Password hash from DB: " + user.getPassword());
-        // BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        // boolean matches = encoder.matches("Admin@123",
-        // "$2a$10$JKTb6X/KVNKDm0BgpDh/feYe6vs/OmLcOBwqeh.eRajP75mjLGbmi");
-        // System.out.println("Matches? " + matches);
-
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
@@ -81,9 +74,16 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional
-    public AccountCreationResponse createAccount(String email) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public AccountCreationResponse createAccount(String email, String roleName) {
 
-        // Extract base username (before @)
+		Set<String> allowedRoles = roleRepo.findAll().stream().map(Role::getRoleName)
+				.collect(Collectors.toSet());
+		String normalizedRole = roleName.toUpperCase();
+		if (!allowedRoles.contains(normalizedRole)) {
+			throw new IllegalArgumentException("Invalid role: " + roleName);
+		}
+         
         String baseUsername = email.substring(0, email.indexOf("@"));
         String username = baseUsername;
 
@@ -93,7 +93,7 @@ public class UserService implements IUserService {
             username = baseUsername + counter;  // ex: rahul → rahul1 → rahul2
             counter++;
         }
-
+              
         // Create new user
         User user = new User();
         user.setUsername(username);
@@ -104,19 +104,15 @@ public class UserService implements IUserService {
         user.setEnabled(true);
         user.setFirstLogin(true);
 
-        // Fetch USER role
-        Role userRole = roleRepo.findByRoleName("USER")
-                .orElseThrow(() -> new RuntimeException("Role: USER not found"));
-
-        user.getRoles().add(userRole);
+        Role role = roleRepo.findByRoleName(normalizedRole)
+                .orElseThrow(() -> new RuntimeException("Role not found: " + normalizedRole));
+        user.getRoles().add(role);
 
         userRepo.save(user);
 
-        // Log securely (NO plain password)
-        log.info("User account created: username={}", username);
+        log.info("Account created: username={}", username);
 
-        // TODO: do not send the password in response instead mail the user
-
+        // TODO: do not send the password in response instead mail the student
         return new AccountCreationResponse(username,
                 "User account created successfully. Temporary password is " + tempPassword);
     }
