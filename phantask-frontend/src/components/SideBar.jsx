@@ -4,11 +4,14 @@ import DesktopSideBar from "./sidebar_components/DesktopSideBar";
 import MobileSideBar from "./sidebar_components/MobileSideBar";
 import TopRightIcons from "./sidebar_components/TopRightIcons";
 import MainContent from "./sidebar_components/MainContent";
+import { useAuth } from "../context/AuthContext";
 
 const CLICK_WINDOW_MS = 4000;   // time window for 3 clicks
 const REQUIRED_CLICKS = 3;
 
 const SideBar = ({ children }) => {
+  const { isAdmin } = useAuth();
+
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const [clickCount, setClickCount] = useState(0);
@@ -18,9 +21,11 @@ const SideBar = ({ children }) => {
 
   const menuItems = [
     { name: "Dashboard", icon: "fa-house", path: "/" },
-    { name: "Assigned Tasks", icon: "fa-clipboard", path: "/tasks" },
+    isAdmin
+      ? { name: "Assign Tasks", icon: "fa-plus", path: "/admin/create-task" }
+      : { name: "Assigned Tasks", icon: "fa-clipboard", path: "/tasks" },
     { name: "Attendance", icon: "fa-circle-check", path: "/attendance" },
-    { name: "Schedule", icon: "fa-clock", path: "/schedule" },
+    // { name: "Schedule", icon: "fa-clock", path: "/schedule" },
     { name: "SocialHub", icon: "fa-comments", path: "/socialhub" },
     { name: "Helpline", icon: "fa-phone", path: "/helpline" },
     { name: "Feedback", icon: "fa-message", path: "/feedback" },

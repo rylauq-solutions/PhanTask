@@ -196,6 +196,8 @@ export const apiService = {
   login: (username, password) =>
     api.post("/auth/login", { username, password }),
 
+  createAccount: (email) => api.post("/users/create-account", { email }),
+
   /* ---------------------------------
    *      TOKEN REFRESH
    * --------------------------------- */

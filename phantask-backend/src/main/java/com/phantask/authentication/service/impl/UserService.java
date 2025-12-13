@@ -104,21 +104,21 @@ public class UserService implements IUserService {
         user.setEnabled(true);
         user.setFirstLogin(true);
 
-        // Fetch STUDENT role
-        Role studentRole = roleRepo.findByRoleName("STUDENT")
-                .orElseThrow(() -> new RuntimeException("Role: STUDENT not found"));
+        // Fetch USER role
+        Role userRole = roleRepo.findByRoleName("USER")
+                .orElseThrow(() -> new RuntimeException("Role: USER not found"));
 
-        user.getRoles().add(studentRole);
+        user.getRoles().add(userRole);
 
         userRepo.save(user);
 
         // Log securely (NO plain password)
-        log.info("Student account created: username={}", username);
+        log.info("User account created: username={}", username);
 
-        // TODO: do not send the password in response instead mail the student
+        // TODO: do not send the password in response instead mail the user
 
         return new AccountCreationResponse(username,
-                "Student account created successfully. Temporary password is " + tempPassword);
+                "User account created successfully. Temporary password is " + tempPassword);
     }
 
     private String defaultIfNull(String value) {

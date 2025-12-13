@@ -81,10 +81,10 @@ const UserProfile = () => {
                                 <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Email</span>
                                 <span className="text-[#5b3627] break-all">{user.email || "N/A"}</span>
                             </div>
-                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                            {/* <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
                                 <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Department</span>
                                 <span className="text-[#5b3627]">{user.department || "N/A"}</span>
-                            </div>
+                            </div> */}
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
                                 <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Primary Role</span>
                                 <span className="inline-flex items-center rounded-full bg-[#FCE0D6] px-2.5 py-1 text-xs font-medium text-[#8c432b]">

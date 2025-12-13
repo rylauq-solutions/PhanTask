@@ -45,7 +45,7 @@ const ProfileDropDown = ({ profilePic }) => {
         <img
           src={profilePic || "/default-avatar.png"}
           alt="Profile"
-          className="h-10 w-10 rounded-full border-2 bg-white border-[#d4b397] object-cover"
+          className="h-10 w-10 md:h-12 md:w-12 rounded-full border-2 bg-white border-[#d4b397] object-cover"
         />
       </button>
 

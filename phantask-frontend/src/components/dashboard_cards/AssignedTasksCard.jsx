@@ -69,17 +69,21 @@ const AssignedTasksCard = () => {
                             <span className="text-2xl">🎉</span>
                         </div>
                         <h3 className="text-xl font-bold text-[#522320] mb-1.5 leading-tight">All Caught Up!</h3>
-                        <p className="text-[#522320]/60 text-xs font-medium text-center leading-tight max-w-[140px]">
+                        <p className="text-[#522320]/60 text-xs font-medium text-center max-w-[160px]">
                             No pending tasks.<br></br> Great work! 🚀
                         </p>
                     </main>
                 }
 
-                {(pendingTasks.length !== 0) && <Link to={'/tasks'}>
-                    <button className="w-full text-center hover:rounded-xl text-[#42260b] text-sm font-medium mt-1 py-2 hover:bg-red-100">
-                        View all
-                    </button>
-                </Link>}
+                {(pendingTasks.length !== 0) ?
+                    <Link to={'/tasks'}>
+                        <button className="w-full text-center hover:rounded-xl text-[#42260b] text-sm font-medium mt-1 py-2 hover:bg-red-100">
+                            View all
+                        </button>
+                    </Link> :
+                    <div className="h-10 mt-1 py-2"></div>
+
+                }
             </span>
         </div>
     )

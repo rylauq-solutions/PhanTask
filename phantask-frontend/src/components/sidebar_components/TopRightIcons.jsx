@@ -13,11 +13,11 @@ const TopRightIcons = ({ isMobileOpen }) => {
         <div>
             {!isMobileOpen && (
                 <>
-                    <div className="fixed top-3 right-16 z-50">
+                    {/* <div className="fixed top-3 right-16 z-50">
                         <Notification />
-                    </div>
+                    </div> */}
 
-                    <div className="fixed top-3 right-5 z-50">
+                    <div className="fixed top-5 right-5 z-50">
                         <ProfileDropDown profilePic={user?.profilePic || mascot} />
                     </div>
                 </>
