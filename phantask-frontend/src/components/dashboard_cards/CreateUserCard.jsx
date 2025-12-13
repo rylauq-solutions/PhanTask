@@ -86,12 +86,12 @@ const CreateUserModal = ({ onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Overlay */}
       <div
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-black/40 "
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative w-[90%] sm:w-[85%] md:w-2/5 max-h-[95vh] overflow-auto">
+      <div className="relative w-[90%] sm:w-[85%] md:w-2/5 max-h-[95vh] overflow-auto animate-slideUp">
         <div className="bg-white rounded-xl p-4 md:p-6 shadow-xl h-full flex flex-col border border-red-700/30">
 
           {/* Header */}
@@ -183,6 +183,18 @@ const CreateUserModal = ({ onClose }) => {
 
         </div>
       </div>
+      {/* Tailwind animation */}
+      <style>
+        {`
+          @keyframes slideUp {
+            0% { transform: translateY(100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+          }
+          .animate-slideUp {
+            animation: slideUp 0.2s ease-out forwards;
+          }
+        `}
+      </style>
     </div>
   );
 };

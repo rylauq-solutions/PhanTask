@@ -9,6 +9,7 @@ import ScheduleCard from "../components/dashboard_cards/ScheduleCard.jsx";
 import { useAuth } from '../context/AuthContext';
 import PhanAI from "../components/PhanAI.jsx";
 import AdminCreateUser from "../components/dashboard_cards/CreateUserCard.jsx";
+import AdminTasksCard from "../components/dashboard_cards/CreateTasksCard.jsx";
 
 const Dashboard = () => {
   const { user, isAdmin } = useAuth();
@@ -59,9 +60,10 @@ const Dashboard = () => {
           }
 
           {/* Middle Column - Attendance (spans 1 column) */}
-          <div className="h-72">
-            <AssignedTasksCard />
-          </div>
+          {isAdmin ?
+            <div className="h-72"><AdminTasksCard /></div> :
+            <div className="h-72"><AssignedTasksCard /></div>
+          }
 
           {/* Right Column - Focus Reminder (spans 1 column) */}
           <div className="h-72">

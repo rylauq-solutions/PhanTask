@@ -22,7 +22,7 @@ const SideBar = ({ children }) => {
   const menuItems = [
     { name: "Dashboard", icon: "fa-house", path: "/" },
     isAdmin
-      ? { name: "Assign Tasks", icon: "fa-plus", path: "/admin/create-task" }
+      ? { name: "Manage Tasks", icon: "fa-plus", path: "/admin/manage-tasks" }
       : { name: "Assigned Tasks", icon: "fa-clipboard", path: "/tasks" },
     { name: "Attendance", icon: "fa-circle-check", path: "/attendance" },
     // { name: "Schedule", icon: "fa-clock", path: "/schedule" },

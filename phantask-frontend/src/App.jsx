@@ -17,6 +17,7 @@ import { ApiProvider } from "./context/ApiContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import UserProfile from "./pages/UserProfile";
 import UpdateProfile from "./pages/UpdateProfile";
+import ManageTasks from "./pages/ManageTasks";
 
 const AppContent = () => {
   const location = useLocation();
@@ -52,6 +53,16 @@ const AppContent = () => {
             <PrivateRoute>
               <SideBar>
                 <AssignedTasks />
+              </SideBar>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/manage-tasks"
+          element={
+            <PrivateRoute>
+              <SideBar>
+                <ManageTasks />
               </SideBar>
             </PrivateRoute>
           }

@@ -4,6 +4,7 @@ import LoadingSkeleton from '../LoadingSkeleton';
 import { apiService } from '../../services/api';
 
 const AssignedTasksCard = () => {
+
     const [pendingTasks, setPendingTasks] = useState([]); // Local state for tasks
     const [loading, setLoading] = useState(true);         // Loading state
 
