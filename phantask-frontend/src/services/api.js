@@ -199,9 +199,12 @@ export const apiService = {
   /* ---------------------------------
    *     USER MANAGEMENT (ADMIN)
    * --------------------------------- */
-  createAccount: (email, role) => api.post("/users/create-account", { email, role }),
+  createAccount: (email, role) =>
+    api.post("/users/create-account", { email, role }),
   deactivateUser: (userId) => api.put(`/users/${userId}/deactivate`),
+  reactivateUser: (userId) => api.put(`/users/${userId}/reactivate`),
   getAllActiveUsers: () => api.get("/users/active"),
+  getAllInactiveUsers: () => api.get("/users/inactive"),
 
   /* ---------------------------------
    *      TOKEN REFRESH

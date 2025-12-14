@@ -74,10 +74,11 @@ const CreateTaskModal = ({ onClose }) => {
   // * User Options for Dropdown (dynamically populated)
   const userOptions = [
     { value: "", label: "Select User..." },
-    ...users.map(user => ({
-      value: user.username,
-      label: `${user.username} (${user.email})`
-    }))
+    ...users.filter(user => !user.roles.includes("ADMIN"))
+      .map(user => ({
+        value: user.username,
+        label: `${user.username} (${user.email})`
+      }))
   ];
 
   // * Custom Styles for React-Select (matching input styling)

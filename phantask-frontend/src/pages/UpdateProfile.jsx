@@ -131,7 +131,7 @@ const UserProfile = () => {
                     <div className="text-base text-[#522320] pb-4 pt-2">
                         {/* Top Section */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="bg-white rounded-lg p-3 border border-[#E7B9AE]/80">
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
                                 <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
                                     Username
                                 </span>
