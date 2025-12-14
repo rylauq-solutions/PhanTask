@@ -47,6 +47,7 @@ export default CreateUserCard;
 
 const CreateUserModal = ({ onClose }) => {
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState("USER"); // default value
   const [loading, setLoading] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -57,6 +58,11 @@ const CreateUserModal = ({ onClose }) => {
       return;
     }
 
+    if (!role.trim()) {
+      toast.error("Role is required");
+      return;
+    }
+
     if (!confirmed) {
       toast.error("Please confirm the email before proceeding");
       return;
@@ -64,19 +70,14 @@ const CreateUserModal = ({ onClose }) => {
 
     try {
       setLoading(true);
-
-      const res = await apiService.createAccount(email);
-
+      const res = await apiService.createAccount(email, role);
       toast.success(
-        `User created 🎉\nUsername: ${res.data.username}\n${res.data.tempPasswordMessage}`,
+        `User created! \nUsername: ${res.data.username}\n${res.data.tempPasswordMessage}`,
         { duration: 4000 }
       );
-
       onClose();
     } catch (err) {
-      toast.error(
-        err?.response?.data?.error || "Failed to create user"
-      );
+      toast.error(err?.response?.data?.error || "Failed to create user");
     } finally {
       setLoading(false);
     }
@@ -85,10 +86,7 @@ const CreateUserModal = ({ onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/40 "
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* Modal */}
       <div className="relative w-[90%] sm:w-[85%] md:w-2/5 max-h-[95vh] overflow-auto animate-slideUp">
@@ -96,28 +94,40 @@ const CreateUserModal = ({ onClose }) => {
 
           {/* Header */}
           <div className="mb-3 text-center">
-            <h3 className="text-2xl font-bold text-amber-950">
-              Create User
-            </h3>
-            <p className="text-sm text-gray-700 mt-1">
-              Add a new user using email address
-            </p>
+            <h3 className="text-2xl font-bold text-amber-950">Create User</h3>
+            <p className="text-sm text-gray-700 mt-1">Add a new user using email address</p>
           </div>
 
           {/* Body */}
-          <div className="flex-1">
-            <label className="text-sm font-semibold text-gray-800">
-              Email Address
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="user@example.com"
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-                focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
-            />
+          <div className="flex-1 flex flex-col gap-3">
+            {/* Email */}
+            <div>
+              <label className="text-sm font-semibold text-gray-800">Email Address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="user@example.com"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
+                  focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
+              />
+            </div>
 
+            {/* Role Dropdown */}
+            <div>
+              <label className="text-sm font-semibold text-gray-800">Role</label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
+                  focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
+              >
+                <option value="USER">User</option>
+                <option value="HR">HR</option>
+                <option value="STUDENT">Student</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
           </div>
 
           {/* Footer */}
@@ -126,16 +136,14 @@ const CreateUserModal = ({ onClose }) => {
               <div className="flex gap-2">
                 <button
                   onClick={() => setConfirmVisible(true)}
-                  className="flex-1 py-2 rounded-lg bg-red-700 hover:bg-red-800
-                    text-white font-semibold hover:scale-95 transition-transform duration-300 shadow"
+                  className="flex-1 py-2 rounded-lg bg-red-700 hover:bg-red-800 text-white font-semibold hover:scale-95 transition-transform duration-300 shadow"
                 >
                   Create User
                 </button>
 
                 <button
                   onClick={onClose}
-                  className="flex-1 py-2 rounded-lg bg-stone-200 hover:bg-stone-300
-                    text-gray-800 font-semibold hover:scale-95 transition-transform duration-300 shadow"
+                  className="flex-1 py-2 rounded-lg bg-stone-200 hover:bg-stone-300 text-gray-800 font-semibold hover:scale-95 transition-transform duration-300 shadow"
                 >
                   Cancel
                 </button>
@@ -171,8 +179,7 @@ const CreateUserModal = ({ onClose }) => {
                       setConfirmVisible(false);
                       setConfirmed(false);
                     }}
-                    className="flex-1 py-2 rounded-lg bg-stone-200 hover:bg-stone-300
-                      text-gray-800 font-semibold hover:scale-95 transition-transform duration-300 shadow"
+                    className="flex-1 py-2 rounded-lg bg-stone-200 hover:bg-stone-300 text-gray-800 font-semibold hover:scale-95 transition-transform duration-300 shadow"
                   >
                     Back
                   </button>
@@ -180,9 +187,9 @@ const CreateUserModal = ({ onClose }) => {
               </div>
             )}
           </div>
-
         </div>
       </div>
+
       {/* Tailwind animation */}
       <style>
         {`
@@ -198,3 +205,4 @@ const CreateUserModal = ({ onClose }) => {
     </div>
   );
 };
+

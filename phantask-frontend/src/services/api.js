@@ -199,7 +199,7 @@ export const apiService = {
   /* ---------------------------------
    *     USER MANAGEMENT (ADMIN)
    * --------------------------------- */
-  createAccount: (email) => api.post("/users/create-account", { email }),
+  createAccount: (email, role) => api.post("/users/create-account", { email, role }),
   deactivateUser: (userId) => api.put(`/users/${userId}/deactivate`),
   getAllActiveUsers: () => api.get("/users/active"),
 
