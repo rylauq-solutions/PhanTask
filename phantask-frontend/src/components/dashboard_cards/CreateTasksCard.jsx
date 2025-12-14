@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { apiService } from "../../services/api";
 import { toast } from "react-hot-toast";
+import Select from "react-select";
 
 const CreateTaskCard = () => {
   const [showModal, setShowModal] = useState(false);
@@ -50,23 +51,101 @@ const CreateTaskModal = ({ onClose }) => {
   const [assignedUser, setAssignedUser] = useState("");
   const [assignedRole, setAssignedRole] = useState("");
   const [users, setUsers] = useState([]);
-  const [roles, setRoles] = useState([]);
+  const [assignedRoleByUsers, setAssignedRoleByUsers] = useState("");
+
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const usersRes = await apiService.getUsers();
-        setUsers(usersRes.data || []);
+  const roleOptions = [
+    { value: "", label: "Select Role..." },
+    { value: "USER", label: "User" },
+    { value: "HR", label: "HR" },
+    { value: "STUDENT", label: "Student" },
+    { value: "ADMIN", label: "Admin" }
+  ];
 
-        const rolesRes = await apiService.getRoles();
-        setRoles(rolesRes.data || []);
+  const userOptions = [
+    { value: "", label: "Select User..." },
+    ...users.map(user => ({
+      value: user.username,
+      label: `${user.username} (${user.email})`
+    }))
+  ];
+
+  // Custom styles for react-select
+  const selectStyles = {
+    control: (base, state) => ({
+      ...base,
+      minHeight: "40px",
+      borderRadius: "0.5rem",
+      borderColor: state.isFocused ? "#dc2626" : "#d1d5db",
+      boxShadow: state.isFocused
+        ? "0 0 0 2px rgb(220 38 38 / 0.5)"
+        : "none",
+      "&:hover": {
+        borderColor: "#dc2626",
+      },
+    }),
+
+    option: (base, state) => ({
+      ...base,
+      fontSize: "0.875rem", // match input text-sm
+      backgroundColor: state.isSelected
+        ? "#facc15" // yellow-400
+        : state.isFocused
+          ? "#fef3c7" // yellow-100 (soft hover)
+          : "white",
+      color: state.isSelected ? "#422006" : "#111827",
+      cursor: "pointer",
+    }),
+
+    placeholder: (base) => ({
+      ...base,
+      color: "#9ca3af",
+      fontSize: "0.875rem",
+    }),
+
+    singleValue: (base) => ({
+      ...base,
+      fontSize: "0.875rem",
+      color: "#111827",
+    }),
+
+    menu: (base) => ({
+      ...base,
+      borderRadius: "0.5rem",
+      zIndex: 50,
+    }),
+  };
+
+
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersRes = await apiService.getAllActiveUsers();
+        const fetchedUsers = usersRes.data || [];
+
+        // Natural sort by username
+        const naturalSort = (a, b) => {
+          const regex = /^([a-zA-Z]+)(\d*)$/;
+          const [, textA = "", numA = "0"] = a.username.match(regex) || [];
+          const [, textB = "", numB = "0"] = b.username.match(regex) || [];
+
+          const textCompare = textA.localeCompare(textB);
+          if (textCompare !== 0) return textCompare;
+          return Number(numA) - Number(numB);
+        };
+
+        const sortedUsers = fetchedUsers.sort(naturalSort);
+        setUsers(sortedUsers);
       } catch (err) {
-        toast.error("Failed to fetch users or roles");
+        toast.error("Failed to fetch active users");
       }
     };
-    fetchData();
+    fetchUsers();
   }, []);
+
+
 
   const handleCreateTask = async () => {
     if (!taskName.trim() || !description.trim() || !dueDate) {
@@ -74,25 +153,55 @@ const CreateTaskModal = ({ onClose }) => {
       return;
     }
 
-    if (!assignedUser && !assignedRole) {
+    if (!assignedUser && !assignedRole && !assignedRoleByUsers) {
       toast.error("Please assign the task to a user or a role");
       return;
     }
 
     try {
       setLoading(true);
-      const taskData = {
-        taskName,
-        description,
-        dueDate,
-        assignedToUser: assignedUser || null,
-        assignedToRole: assignedRole || null,
-        status: "PENDING",
-      };
 
-      const res = await apiService.createTask(taskData);
+      if (assignedRoleByUsers) {
+        // Assign to all users with selected role
+        const usersWithRole = users.filter(user =>
+          user.roles.includes(assignedRoleByUsers)
+        );
 
-      toast.success(`Task "${res.data.taskName}" created successfully!`);
+        if (usersWithRole.length === 0) {
+          toast.error(`No users found with role ${assignedRoleByUsers}`);
+          return;
+        }
+
+        // Fire API for each user
+        for (const user of usersWithRole) {
+          const taskData = {
+            taskName,
+            description,
+            dueDate,
+            assignedToUser: user.username,
+            assignedToRole: null, // since it's per-user
+            status: "PENDING",
+          };
+
+          await apiService.createTask(taskData);
+        }
+
+        toast.success(`Task created for all users with role ${assignedRoleByUsers}`);
+      } else {
+        // Normal single assignment
+        const taskData = {
+          taskName,
+          description,
+          dueDate,
+          assignedToUser: assignedUser || null,
+          assignedToRole: assignedRole || null,
+          status: "PENDING",
+        };
+
+        const res = await apiService.createTask(taskData);
+        toast.success(`Task "${res.data.taskName}" created successfully!`);
+      }
+
       onClose();
     } catch (err) {
       toast.error(err?.response?.data?.error || "Failed to create task");
@@ -101,27 +210,19 @@ const CreateTaskModal = ({ onClose }) => {
     }
   };
 
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center">
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/40 transition-opacity duration-300"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      {/* Modal */}
-      <div
-        className="relative w-[90%] sm:w-[85%] md:w-2/5 max-h-[95vh] overflow-y-scroll
+      <div className="relative w-[90%] sm:w-[85%] md:w-2/5 max-h-[95vh] overflow-y-scroll
           bg-white rounded-xl p-4 md:p-6 shadow-xl border border-red-700/30
           transform transition-transform duration-300 ease-out
-          animate-slideUp"
-      >
+          animate-slideUp">
         {/* Header */}
         <div className="mb-3 text-center">
           <h3 className="text-2xl font-bold text-amber-950">Create Task</h3>
-          <p className="text-sm text-gray-700 mt-1">
-            Assign a new task to a user or a role
-          </p>
+          <p className="text-sm text-gray-700 mt-1">Assign a new task to a user or a role</p>
         </div>
 
         {/* Body */}
@@ -154,31 +255,88 @@ const CreateTaskModal = ({ onClose }) => {
               focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
           />
 
-          <label className="text-sm font-semibold text-gray-800">Assign to User</label>
-          <select
-            value={assignedUser}
-            onChange={(e) => setAssignedUser(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-              focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
-          >
-            <option value="">-- Select User --</option>
-            {users.map((u) => (
-              <option key={u.uid} value={u.username}>{u.username}</option>
-            ))}
-          </select>
+          <label className="text-sm font-semibold text-gray-800">
+            Assign to User
+          </label>
 
+          <Select
+            styles={selectStyles}
+            isDisabled={assignedRoleByUsers !== "" || assignedRole !== ""}
+            placeholder="Select User..."
+            value={
+              assignedUser
+                ? userOptions.find(u => u.value === assignedUser)
+                : null
+            }
+            onChange={(opt) => {
+              setAssignedUser(opt?.value || "");
+              if (opt) {
+                setAssignedRole("");
+                setAssignedRoleByUsers("");
+              }
+            }}
+            options={userOptions}
+          />
+
+
+          {/* OR Separator */}
+          <div className="flex items-center my-1">
+            <div className="flex-grow border-t border-[#522320]/40"></div>
+            <span className="mx-2 text-xs text-[#522320]/60 font-medium bg-white px-2">OR</span>
+            <div className="flex-grow border-t border-[#522320]/40"></div>
+          </div>
+
+          {/* Assign to Users by Role */}
+          <label className="text-sm font-semibold text-gray-800 mt-2">
+            Assign to Users by Role
+          </label>
+          <Select
+            styles={selectStyles}
+            isDisabled={assignedUser !== "" || assignedRole !== ""}
+            placeholder="Select Role..."
+            value={
+              assignedRoleByUsers
+                ? roleOptions.find(r => r.value === assignedRoleByUsers)
+                : null
+            }
+            onChange={(opt) => {
+              setAssignedRoleByUsers(opt?.value || "");
+              if (opt) {
+                setAssignedUser("");
+                setAssignedRole("");
+              }
+            }}
+            options={roleOptions}
+          />
+
+          {/* OR Separator */}
+          <div className="flex items-center my-1">
+            <div className="flex-grow border-t border-[#522320]/40"></div>
+            <span className="mx-2 text-xs text-[#522320]/60 font-medium bg-white px-2">OR</span>
+            <div className="flex-grow border-t border-[#522320]/40"></div>
+          </div>
+
+          {/* Assign to Role */}
           <label className="text-sm font-semibold text-gray-800">Assign to Role</label>
-          <select
-            value={assignedRole}
-            onChange={(e) => setAssignedRole(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-              focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
-          >
-            <option value="">-- Select Role --</option>
-            {roles.map((r) => (
-              <option key={r.rid} value={r.roleName}>{r.roleName}</option>
-            ))}
-          </select>
+          <Select
+            styles={selectStyles}
+            isDisabled={assignedUser !== "" || assignedRoleByUsers != ""}
+            placeholder="Select Role..."
+            value={
+              assignedRole
+                ? roleOptions.find(r => r.value === assignedRole)
+                : null
+            }
+            onChange={(opt) => {
+              setAssignedRole(opt?.value || "");
+              if (opt) {
+                setAssignedUser("");
+                setAssignedRoleByUsers("");
+              }
+            }}
+            options={roleOptions}
+          />
+
         </div>
 
         {/* Footer */}
@@ -213,17 +371,22 @@ const CreateTaskModal = ({ onClose }) => {
           .animate-slideUp {
             animation: slideUp 0.2s ease-out forwards;
           }
+
+          /* Custom scrollbar for modal */
           .overflow-y-scroll::-webkit-scrollbar {
             width: 8px;
           }
+
           .overflow-y-scroll::-webkit-scrollbar-track {
             background: transparent;
             margin: 0.4rem 0;
           }
+
           .overflow-y-scroll::-webkit-scrollbar-thumb {
             background: #d1d5db;
             border-radius: 8px;
           }
+
           .overflow-y-scroll::-webkit-scrollbar-thumb:hover {
             background: #9ca3af;
           }

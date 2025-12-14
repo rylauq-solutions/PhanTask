@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { apiService } from "../../services/api";
 import { toast } from "react-hot-toast";
+import Select from "react-select";
 
 const CreateUserCard = () => {
   const [showModal, setShowModal] = useState(false);
@@ -51,6 +52,43 @@ const CreateUserModal = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+
+  const roleOptions = [
+    { value: "USER", label: "User" },
+    { value: "HR", label: "HR" },
+    { value: "STUDENT", label: "Student" },
+    { value: "ADMIN", label: "Admin" },
+  ];
+
+  const selectStyles = {
+    control: (base, state) => ({
+      ...base,
+      minHeight: "40px",
+      borderRadius: "0.5rem",
+      borderColor: state.isFocused ? "#dc2626" : "#d1d5db",
+      boxShadow: state.isFocused
+        ? "0 0 0 2px rgb(220 38 38 / 0.5)"
+        : "none",
+      "&:hover": {
+        borderColor: "#dc2626",
+      },
+    }),
+    option: (base, state) => ({
+      ...base,
+      fontSize: "0.875rem",
+      backgroundColor: state.isSelected
+        ? "#facc15"
+        : state.isFocused
+          ? "#fef3c7"
+          : "white",
+      color: state.isSelected ? "#422006" : "#111827",
+      cursor: "pointer",
+    }),
+    placeholder: (base) => ({ ...base, color: "#9ca3af", fontSize: "0.875rem" }),
+    singleValue: (base) => ({ ...base, fontSize: "0.875rem", color: "#111827" }),
+    menu: (base) => ({ ...base, borderRadius: "0.5rem", zIndex: 50 }),
+  };
+
 
   const handleCreateUser = async () => {
     if (!email.trim()) {
@@ -116,18 +154,15 @@ const CreateUserModal = ({ onClose }) => {
             {/* Role Dropdown */}
             <div>
               <label className="text-sm font-semibold text-gray-800">Role</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-                  focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
-              >
-                <option value="USER">User</option>
-                <option value="HR">HR</option>
-                <option value="STUDENT">Student</option>
-                <option value="ADMIN">Admin</option>
-              </select>
+              <Select
+                styles={selectStyles}
+                placeholder="Select Role..."
+                value={roleOptions.find(r => r.value === role)}
+                onChange={(opt) => setRole(opt?.value || "USER")}
+                options={roleOptions}
+              />
             </div>
+
           </div>
 
           {/* Footer */}

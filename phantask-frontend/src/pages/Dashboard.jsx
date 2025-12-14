@@ -37,7 +37,7 @@ const Dashboard = () => {
     setCurrentDate(now.toLocaleDateString("en-US", options));
   }, []);
 
-  console.log(user);
+  // console.log(user);
 
 
   return (
