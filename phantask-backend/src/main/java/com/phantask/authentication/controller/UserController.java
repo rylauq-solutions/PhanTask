@@ -2,6 +2,7 @@ package com.phantask.authentication.controller;
 
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.phantask.authentication.dto.AccountCreationResponse;
+import com.phantask.authentication.dto.AdminEditUserRequest;
 import com.phantask.authentication.dto.PasswordChangeRequest;
 import com.phantask.authentication.dto.RegisterRequest;
 import com.phantask.authentication.dto.UpdateProfileRequest;
@@ -24,6 +26,7 @@ import com.phantask.authentication.dto.UserProfileResponse;
 import com.phantask.authentication.dto.UserResponse;
 import com.phantask.authentication.entity.UserProfile;
 import com.phantask.authentication.service.api.IUserService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -90,6 +93,13 @@ public class UserController {
 	    }
 	}
 
+	@PutMapping("/{userId}/edit")
+	public ResponseEntity<String> editUserByAdmin(
+	        @PathVariable Long userId,
+	        @RequestBody AdminEditUserRequest req) {
+	    return ResponseEntity.ok(userService.editUserByAdmin(userId, req));
+	}
+	
 	/**
 	 * Deactivate an active user account.
 	 *

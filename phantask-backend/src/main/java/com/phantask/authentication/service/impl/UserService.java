@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.phantask.authentication.dto.AccountCreationResponse;
+import com.phantask.authentication.dto.AdminEditUserRequest;
 import com.phantask.authentication.dto.PasswordChangeRequest;
 import com.phantask.authentication.dto.UpdateProfileRequest;
 import com.phantask.authentication.dto.UserProfileResponse;
@@ -231,7 +232,7 @@ public class UserService implements IUserService {
        rules (strength, not same as old password, etc.). If invalid, 
        an error is thrown.
     4. If everything is valid, encode the new password and save it 
-       to the database. Also clear any “first login” flag if needed.
+       to the database. Also clear any "first login" flag if needed.
     5. Finally, return a success message.
     */
     @Override
@@ -350,6 +351,7 @@ public class UserService implements IUserService {
 				.toList();
 	}
 	
+	//To map User entity to UserResponse DTO
 	private UserResponse mapToResponse(User user) {
         return new UserResponse(
                 user.getUid(),
@@ -358,7 +360,94 @@ public class UserService implements IUserService {
                 user.getRoles().stream()
                         .map(Role::getRoleName)
                         .toList(),
-                user.isEnabled()
+                user.isEnabled(),
+                user.isFirstLogin(),
+                user.getCreatedAt(),
+                user.getDeactivatedAt()                
         );
     }
+	
+	/*
+	 * This method allows an admin to edit a user's profile and optionally reset their password.
+	 * 
+	 * What it does:
+	 * 1. Fetch the user from the database using the userId.
+	 *    If the user does not exist, an error is thrown.
+	 * 2. Retrieve the user's profile or create a new one if it doesn't exist.
+	 *    The profile is saved immediately to make it managed by JPA.
+	 * 3. Update profile fields (fullName, department, phone, yearOfStudy, dob) 
+	 *    only if they are provided in the request (not null).
+	 * 4. Forcefully set the profile picture to null to remove any existing image.
+	 * 5. Save the updated profile to the database.
+	 * 6. If resetPassword flag is true:
+	 *    - Reset the password to the default temporary password (Temp@123)
+	 *    - Set firstLogin flag to true so user must change password on next login
+	 *    - Clear the passwordChangedAt timestamp
+	 *    - Save the user and flush changes immediately to the database
+	 * 7. Return a success message.
+	 */
+	@Override
+	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
+	public String editUserByAdmin(Long userId, AdminEditUserRequest req) {
+	    log.info("Starting editUserByAdmin for userId: {}", userId);
+	    log.info("Request data - resetPassword: {}", req.getResetPassword());
+
+	    User user = userRepo.findById(userId)
+	            .orElseThrow(() -> new RuntimeException("User not found"));
+
+	    // Update profile - save immediately to make it a managed entity
+	    UserProfile profile = profileRepo.findByUser(user).orElseGet(() -> {
+	        UserProfile p = new UserProfile();
+	        p.setUser(user);
+	        user.setProfile(p);
+	        return profileRepo.save(p);
+	    });
+
+	    // Update profile fields only if provided (not null)
+	    if (req.getFullName() != null) {
+	        log.info("Updating fullName to: {}", req.getFullName());
+	        profile.setFullName(req.getFullName());
+	    }
+	    if (req.getDepartment() != null) {
+	        log.info("Updating department to: {}", req.getDepartment());
+	        profile.setDepartment(req.getDepartment());
+	    }
+	    if (req.getPhone() != null) {
+	        log.info("Updating phone to: {}", req.getPhone());
+	        profile.setPhone(req.getPhone());
+	    }
+	    if (req.getYearOfStudy() != null) {
+	        log.info("Updating yearOfStudy to: {}", req.getYearOfStudy());
+	        profile.setYearOfStudy(req.getYearOfStudy());
+	    }
+	    if (req.getDob() != null) {
+	        log.info("Updating dob to: {}", req.getDob());
+	        profile.setDob(req.getDob());
+	    }
+
+	    // Forcefully remove profile picture
+	    log.info("Setting profile pic to null");
+	    profile.setProfilePic(null);
+
+	    UserProfile savedProfile = profileRepo.save(profile);
+	    log.info("Profile saved: {}", savedProfile.getUserId());
+
+	    // Reset password if requested
+	    log.info("Checking resetPassword flag: {}", req.getResetPassword());
+	    if (req.getResetPassword()) {
+	        log.info("ENTERING password reset block for user: {}", userId);
+	        user.setPassword(passwordEncoder.encode("Temp@123"));
+	        user.setFirstLogin(true);
+	        user.setPasswordChangedAt(null);
+	        User savedUser = userRepo.save(user);
+	        userRepo.flush(); // Force immediate commit to database
+	        log.info("Password reset complete. FirstLogin set to: {}", savedUser.isFirstLogin());
+	    } else {
+	        log.info("Password reset SKIPPED - resetPassword was false");
+	    }
+
+	    log.info("editUserByAdmin completed successfully for userId: {}", userId);
+	    return "User updated successfully";
+	}
 }

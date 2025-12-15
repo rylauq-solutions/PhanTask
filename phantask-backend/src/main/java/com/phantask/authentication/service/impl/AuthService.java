@@ -2,6 +2,7 @@ package com.phantask.authentication.service.impl;
 
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.phantask.authentication.dto.LoginRequest;
 import com.phantask.authentication.entity.Role;
 import com.phantask.authentication.entity.User;
+import com.phantask.authentication.exception.AccountDeactivatedException;
 import com.phantask.authentication.repository.UserRepository;
 import com.phantask.authentication.security.JwtUtil;
 import com.phantask.authentication.service.api.IAuthService;
@@ -36,31 +38,42 @@ public class AuthService implements IAuthService {
     /**
      * Handles user login.
      * - Authenticates credentials
+     * - Checks if the user is activated/deactivated
      * - Checks if first login (require password change)
      * - Returns access token, refresh token, and roles
      */
     @Override
     public Map<String, Object> login(LoginRequest req) {
+	    User user = userRepo.findByUsername(req.getUsername())
+	            .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
+	
+	    // Business rule check BEFORE authentication
+	    if (!user.isEnabled()) {
+	        throw new AccountDeactivatedException("Account is deactivated. Please contact admin.");
+	    }
+	
+	    authManager.authenticate(
+	            new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword())
+	    );
+	
+	    if (user.isFirstLogin()) {
+	        return Map.of(
+	                "requirePasswordChange", true,
+	                "message", "Password change required before login"
+	        );
+	    }
+	
+	    String token = jwtUtil.generateAccessToken(user);
+	    String refreshToken = jwtUtil.generateRefreshToken(user);
+	
+	    return Map.of(
+	            "token", token,
+	            "refreshToken", refreshToken,
+	            "role", extractRoleNames(user),
+	            "requirePasswordChange", false
+	    );
+	}
 
-        User user = userRepo.findByUsername(req.getUsername())
-                .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
-
-        authManager.authenticate(new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword()));
-
-        if (user.isFirstLogin()) {
-            return Map.of("requirePasswordChange", true, "message", "Password change required before login");
-        }
-
-        String token = jwtUtil.generateAccessToken(user);
-        String refreshToken = jwtUtil.generateRefreshToken(user);
-
-        return Map.of(
-                "token", token,
-                "refreshToken", refreshToken,
-                "role", extractRoleNames(user),
-                "requirePasswordChange", false
-        );
-    }
 
     /**
      * Generates a new access token using a valid refresh token.

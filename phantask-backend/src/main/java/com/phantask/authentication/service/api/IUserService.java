@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import com.phantask.authentication.dto.AccountCreationResponse;
+import com.phantask.authentication.dto.AdminEditUserRequest;
 import com.phantask.authentication.dto.PasswordChangeRequest;
 import com.phantask.authentication.dto.UpdateProfileRequest;
 import com.phantask.authentication.dto.UserProfileResponse;
@@ -21,4 +22,5 @@ public interface IUserService extends UserDetailsService {
 	void reactivateUser(Long userId);
     List<UserResponse> getAllActiveUsers();
     List<UserResponse> getAllInactiveUsers();
+    String editUserByAdmin(Long userId, AdminEditUserRequest req);
 }
