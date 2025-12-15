@@ -201,6 +201,8 @@ export const apiService = {
    * --------------------------------- */
   createAccount: (email, role) =>
     api.post("/users/create-account", { email, role }),
+  editUserByAdmin: (userId, userData) =>
+    api.put(`/users/${userId}/edit`, userData),
   deactivateUser: (userId) => api.put(`/users/${userId}/deactivate`),
   reactivateUser: (userId) => api.put(`/users/${userId}/reactivate`),
   getAllActiveUsers: () => api.get("/users/active"),

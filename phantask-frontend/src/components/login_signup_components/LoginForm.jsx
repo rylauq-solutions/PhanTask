@@ -42,7 +42,7 @@ const LoginForm = ({ onLoginSuccess }) => {
 
       onLoginSuccess(response.data, formData.username, requirePasswordChange);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed. Check your credentials.');
+      toast.error(error.response?.data?.error || 'Login failed. Check your credentials.');
     } finally {
       setIsLoading(false);
     }
