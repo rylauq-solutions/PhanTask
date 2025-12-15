@@ -47,81 +47,107 @@ const UserProfile = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4">
             <div className="max-w-4xl mx-auto flex items-center justify-center py-8">
+                {/* Main profile card */}
                 <section className="w-full rounded-2xl border-2 border-[#522320] bg-[#ffffff]/40 p-3 shadow-md shadow-[#522320]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#522320]/30 hover:-translate-y-0.5 px-5 sm:px-6 md:px-8 py-6 flex flex-col gap-6 relative">
 
                     {/* Header */}
-                    <header className="flex flex-col md:flex-row items-center md:justify-between gap-4">
-                        <div className="flex flex-col flex-1 text-center w-full">
-                            <h2 className="text-2xl md:text-3xl font-bold text-amber-950">
+                    <header className="flex flex-col lg:flex-row items-center lg:justify-between gap-4">
+                        <div className="flex flex-col items-center w-full text-center px-4 sm:px-6">
+                            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-amber-950">
                                 My Profile
                             </h2>
-                            <p className="text-sm font-normal text-amber-950 mt-1">
+
+                            {/* Subtitle */}
+                            <p className="text-sm sm:text-base font-normal text-amber-950 mt-2">
                                 Manage your PhanTask account details.
                             </p>
                         </div>
-                        <div className="h-16 w-16 md:absolute md:top-6 md:right-6 rounded-full border-2 border-orange-400 flex items-center justify-center flex-shrink-0">
+
+                        <div className="h-16 w-16 lg:absolute lg:top-6 lg:right-6 rounded-full border-2 border-orange-400 flex items-center justify-center flex-shrink-0">
                             <img
-                                className="h-full w-full rounded-full object-cover"
                                 src={user.profilePic || mascot}
                                 alt="profile"
+                                className="h-full w-full object-cover rounded-full"
                                 onError={(e) => (e.target.src = mascot)}
                             />
                         </div>
                     </header>
 
-                    {/* Content Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-8 md:gap-y-4 text-base text-[#522320] pb-4 pt-2 border-t border-[#E7B9AE]/30">
-                        {/* Left column */}
-                        <div className="space-y-4">
+                    {/* Content - Two Column Grid */}
+                    <div className="text-base text-[#522320] pb-4 pt-2">
+                        {/* Top Section */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Username</span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Username
+                                </span>
                                 <span className="text-[#5b3627] break-all">{user.username || "N/A"}</span>
                             </div>
+
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Email</span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Email
+                                </span>
                                 <span className="text-[#5b3627] break-all">{user.email || "N/A"}</span>
                             </div>
-                            {/* <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Department</span>
-                                <span className="text-[#5b3627]">{user.department || "N/A"}</span>
-                            </div> */}
+
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Primary Role</span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Primary Role
+                                </span>
                                 <span className="inline-flex items-center rounded-full bg-[#FCE0D6] px-2.5 py-1 text-xs font-medium text-[#8c432b]">
-                                    {user.role || (user.roles?.length > 0 ? user.roles[0] : "N/A")}
+                                    {user.role || (user.roles && user.roles.length > 0 ? user.roles[0] : "N/A")}
                                 </span>
                             </div>
+
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">All Roles</span>
-                                <span className="text-[#5b3627]">{user.roles?.length > 0 ? user.roles.join(", ") : "N/A"}</span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Department
+                                </span>
+                                <span className="text-[#5b3627]">{user.department || "N/A"}</span>
                             </div>
                         </div>
 
-                        {/* Mobile separator */}
-                        <div className="md:hidden border-t border-[#E7B9AE]/30 my-2"></div>
+                        {/* Separator */}
+                        <div className="border-t border-[#E7B9AE]/30 my-4"></div>
 
-                        {/* Right column */}
-                        <div className="space-y-4">
+                        {/* Bottom Section */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Full Name</span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Full Name
+                                </span>
                                 <span className="text-[#5b3627]">{user.fullName || "N/A"}</span>
                             </div>
+
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Date of Birth</span>
-                                <span className="text-[#5b3627]">{formatDate(user.dob) || "N/A"}</span>
-                            </div>
-                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Phone</span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Phone
+                                </span>
                                 <span className="text-[#5b3627]">{user.phone || "N/A"}</span>
                             </div>
+
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Year of Study</span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Date of Birth
+                                </span>
+                                <span className="text-[#5b3627]">{formatDate(user.dob)}</span>
+                            </div>
+
+                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Year of Study
+                                </span>
                                 <span className="text-[#5b3627]">{user.yearOfStudy || "N/A"}</span>
                             </div>
                         </div>
+
+                        {/* Separator */}
+                        <div className="border-t border-[#E7B9AE]/30 my-4"></div>
+
                     </div>
 
-                    {/* Footer – Edit button */}
+                    {/* Footer – Edit button in bottom right */}
                     <div className="flex justify-center md:justify-end pt-2 border-t border-[#E7B9AE]/30">
                         <button
                             type="button"
@@ -129,7 +155,7 @@ const UserProfile = () => {
                             className="w-full md:w-auto hover:scale-95 transition-transform duration-300 bg-red-700 hover:bg-red-800 text-white font-semibold py-2.5 px-6 rounded-lg shadow flex items-center justify-center gap-2"
                         >
                             <i className="fa-solid fa-pen"></i>
-                            <span>Edit Details</span>
+                            <span>Edit Profile Picture</span>
                         </button>
                     </div>
                 </section>

@@ -5,18 +5,19 @@ import Phanpy_Greet from '../../components/login_signup_components/Phanpy_Greet'
 import LoginForm from '../../components/login_signup_components/LoginForm';
 import ChangePassword from '../../components/login_signup_components/ChangePassword';
 import { useAuth } from '../../context/AuthContext';
+import UpdateProfileFields from '../../components/login_signup_components/UpdateProfileFields';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { setUser } = useAuth()
+    const { setUser, user } = useAuth();
 
-    // State for first-login flow
+    // State for first-login multi-step flow
+    const [showUpdateProfile, setShowUpdateProfile] = useState(false);
     const [showChangePassword, setShowChangePassword] = useState(false);
     const [currentUsername, setCurrentUsername] = useState('');
 
     // Handle successful login from LoginForm
     const handleLoginSuccess = (data, username, requirePasswordChange) => {
-        // console.log("handleLoginSuccess:", { data, username, requirePasswordChange });
         sessionStorage.setItem("username", username);
         sessionStorage.setItem("userRole", JSON.stringify(data.role));
 
@@ -28,17 +29,24 @@ const Login = () => {
         });
 
         if (requirePasswordChange) {
-            setShowChangePassword(true);
+            // Step 1: Show profile update form first
+            setShowUpdateProfile(true);
             setCurrentUsername(username);
         } else {
             navigate('/');
         }
     };
 
-    // Handle successful password change
+    // Handle profile update completion - move to password change
+    const handleProfileUpdated = () => {
+        setShowUpdateProfile(false);
+        setShowChangePassword(true);
+    };
+
+    // Handle successful password change - go to dashboard
     const handlePasswordChanged = () => {
         setShowChangePassword(false);
-        navigate('/login'); // Go to dashboard
+        navigate('/');
     };
 
     return (
@@ -62,11 +70,16 @@ const Login = () => {
                     </div>
                 </section>
 
-                {/* Right Side - Login/ChangePassword Form */}
+                {/* Right Side - Multi-step Forms */}
                 <aside className="hover:scale-105 transition-transform duration-300 w-full lg:w-50 rounded-2xl flex flex-col items-center justify-center lg:items-start p-4 sm:p-6 overflow-y-auto mt-4 lg:mt-0 lg:p-2 lg:ml-4 min-h-[200px] sm:min-h-[300px]"
                     aria-label="Decorative or supplementary content">
 
-                    {showChangePassword ? (
+                    {showUpdateProfile ? (
+                        <UpdateProfileFields
+                            user={user}
+                            onProfileUpdated={handleProfileUpdated}
+                        />
+                    ) : showChangePassword ? (
                         <ChangePassword
                             onPasswordChanged={handlePasswordChanged}
                             username={currentUsername}

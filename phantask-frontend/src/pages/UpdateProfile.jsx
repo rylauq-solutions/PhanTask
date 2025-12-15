@@ -5,6 +5,7 @@ import { apiService } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { toast } from 'react-hot-toast';
 
+
 const UserProfile = () => {
     const { user, refreshProfile } = useAuth();
     const [file, setFile] = useState(null);
@@ -16,11 +17,6 @@ const UserProfile = () => {
         yearOfStudy: user.yearOfStudy || "",
         dob: user.dob || ""
     });
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
 
     // State for image preview
     const [previewImage, setPreviewImage] = useState(null);
@@ -47,21 +43,24 @@ const UserProfile = () => {
         setPreviewImage(null); // revert preview to default
     };
 
-
     let navigate = useNavigate();
     const handleUpdateProfile = async () => {
         try {
             const formDataToSend = new FormData();
-            formDataToSend.append("fullName", formData.fullName);
-            formDataToSend.append("department", formData.department);
-            formDataToSend.append("phone", formData.phone);
-            formDataToSend.append("yearOfStudy", formData.yearOfStudy);
+
+            // Append all existing fields to prevent them from being set to null
+            formDataToSend.append("fullName", formData.fullName || "");
+            formDataToSend.append("department", formData.department || "");
+            formDataToSend.append("phone", formData.phone || "");
+            formDataToSend.append("yearOfStudy", formData.yearOfStudy || "");
             formDataToSend.append("dob", formData.dob || "");
-            console.log(formData.dob);
-            
-            // Append file only if user selected a new one
+
+            // Append profile picture only if user selected a new one
             if (file) {
                 formDataToSend.append("profilePic", file);
+            } else {
+                toast.error("Please select a profile picture to update.");
+                return;
             }
 
             await apiService.updateProfile(formDataToSend);
@@ -69,7 +68,7 @@ const UserProfile = () => {
             // Refresh context to reflect changes immediately
             await refreshProfile();
 
-            toast.success("Profile updated successfully!");
+            toast.success("Profile picture updated successfully!");
             navigate("/profile");
         } catch (err) {
             console.error("Failed to update profile", err);
@@ -77,7 +76,6 @@ const UserProfile = () => {
         }
     };
 
-    // console.log("Rendering UserProfile with user:", user);
 
     const formatDate = (dateStr) => {
         if (!dateStr) return "-";
@@ -94,12 +92,12 @@ const UserProfile = () => {
                 <section className="w-full rounded-2xl border-2 border-[#522320] bg-[#ffffff]/40 p-3 shadow-md shadow-[#522320]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#522320]/30 hover:-translate-y-0.5 px-5 sm:px-6 md:px-8 py-6 flex flex-col gap-6 relative">
 
                     {/* Header */}
-                    <header className="flex flex-col md:flex-row items-center md:justify-between gap-4">
+                    <header className="flex flex-col lg:flex-row items-center lg:justify-between gap-4">
                         <div className="flex flex-col items-center w-full text-center px-4 sm:px-6">
                             {/* Title container */}
                             <div className="relative">
                                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-amber-950">
-                                    Edit Profile
+                                    Update Profile Picture
                                 </h2>
 
                                 {/* Icon: positioned relative to the title */}
@@ -111,21 +109,19 @@ const UserProfile = () => {
 
                             {/* Subtitle */}
                             <p className="text-sm sm:text-base font-normal text-amber-950 mt-2">
-                                Manage your PhanTask account details.
+                                View your account details and update your profile picture.
                             </p>
                         </div>
 
-
-
-                        <div className="h-16 w-16 md:absolute md:top-6 md:right-6 rounded-full border-2 border-orange-400 flex items-center justify-center flex-shrink-0">
+                        <div className="h-16 w-16 lg:absolute lg:top-6 lg:right-6 rounded-full border-2 border-orange-400 flex items-center justify-center flex-shrink-0">
                             <img
                                 src={previewImage || user.profilePic || mascot}
                                 alt="profile"
                                 className="h-full w-full object-cover rounded-full"
                             />
-
                         </div>
                     </header>
+
 
                     {/* Content - Two Column Grid */}
                     <div className="text-base text-[#522320] pb-4 pt-2">
@@ -155,8 +151,10 @@ const UserProfile = () => {
                             </div>
 
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">All Roles</span>
-                                <span className="text-[#5b3627]">{user.roles && user.roles.length > 0 ? user.roles.join(", ") : "N/A"}</span>
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Department
+                                </span>
+                                <span className="text-[#5b3627]">{formData.department || "N/A"}</span>
                             </div>
                         </div>
 
@@ -166,66 +164,31 @@ const UserProfile = () => {
                         {/* Bottom Section */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Full Name</span>
-                                <input
-                                    type="text"
-                                    name="fullName"
-                                    value={formData.fullName}
-                                    onChange={handleChange}
-                                    className="w-full bg-orange-50 border-2 outline-none focus:border-red-800 rounded-2xl px-3 py-1 text-[#5b3627]"
-                                    placeholder="Enter full name"
-                                    required
-                                />
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Full Name
+                                </span>
+                                <span className="text-[#5b3627]">{formData.fullName || "N/A"}</span>
                             </div>
 
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Department</span>
-                                <input
-                                    type="text"
-                                    name="department"
-                                    value={formData.department}
-                                    onChange={handleChange}
-                                    className="w-full bg-orange-50 border-2 outline-none focus:border-red-800 rounded-2xl px-3 py-1 text-[#5b3627]"
-                                    placeholder="Enter department"
-                                    required
-                                />
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Phone
+                                </span>
+                                <span className="text-[#5b3627]">{formData.phone || "N/A"}</span>
                             </div>
 
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Phone</span>
-                                <input
-                                    type="text"
-                                    name="phone"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    className="w-full bg-orange-50 border-2 outline-none focus:border-red-800 rounded-2xl px-3 py-1 text-[#5b3627]"
-                                    placeholder="Enter phone number"
-                                    required
-                                />
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Date of Birth
+                                </span>
+                                <span className="text-[#5b3627]">{formatDate(formData.dob)}</span>
                             </div>
 
                             <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Year of Study</span>
-                                <input
-                                    type="text"
-                                    name="yearOfStudy"
-                                    value={formData.yearOfStudy}
-                                    onChange={handleChange}
-                                    className="w-full bg-orange-50 border-2 outline-none focus:border-red-800 rounded-2xl px-3 py-1 text-[#5b3627]"
-                                    placeholder="Enter year of study"
-                                />
-                            </div>
-
-                            <div className="bg-white/40 rounded-lg p-3 border border-[#E7B9AE]/80">
-                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">Date of Birth</span>
-                                <input
-                                    type="date"
-                                    name="dob"
-                                    value={formData.dob}
-                                    onChange={handleChange}
-                                    className="w-full bg-orange-50 border-2 outline-none focus:border-red-800 rounded-2xl px-3 py-1 text-[#5b3627]"
-                                    placeholder="Enter year of study"
-                                />
+                                <span className="block text-sm font-semibold text-[#3b1d18] mb-1.5">
+                                    Year of Study
+                                </span>
+                                <span className="text-[#5b3627]">{formData.yearOfStudy || "N/A"}</span>
                             </div>
                         </div>
 
@@ -260,12 +223,9 @@ const UserProfile = () => {
                                 &times;
                             </button>
                         </div>
-
                     </div>
 
-
-
-                    {/* Footer – Edit button in bottom right */}
+                    {/* Footer – Update button in bottom right */}
                     <div className="flex justify-center md:justify-end pt-2 border-t border-[#E7B9AE]/30">
                         <button
                             type="button"
@@ -275,11 +235,10 @@ const UserProfile = () => {
                             <i className="fa-solid fa-pen"></i>
                             <span>Update</span>
                         </button>
-
                     </div>
                 </section>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 };
 

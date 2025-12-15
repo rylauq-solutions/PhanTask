@@ -159,6 +159,7 @@ api.interceptors.response.use(
 
     const status = error.response.status;
     const isRefreshCall = originalRequest?.url?.includes("/auth/refresh-token");
+    const isLoginCall = originalRequest?.url?.includes("/auth/login");
 
     // If 401 and not already retried and not the refresh call itself
     if (status === 401 && !originalRequest._retry && !isRefreshCall) {
@@ -179,7 +180,8 @@ api.interceptors.response.use(
     }
 
     // If still 401 or refresh failed, logout
-    if (status === 401) {
+    // BUT NOT if it's the login endpoint failing
+    if (status === 401 && !isLoginCall) {
       console.error("Authentication failed, logging out");
       sessionStorage.clear();
       window.location.href = "/login?sessionExpired=true";
@@ -226,6 +228,20 @@ export const apiService = {
       oldPassword,
       newPassword,
     });
+  },
+
+  /* ---------------------------------
+   *      UPDATE PROFILE ON FIRST LOGIN (NO AUTH REQUIRED)
+   * --------------------------------- */
+  updateProfileFirstLogin: async (formData, username) => {
+    const publicApi = axios.create({
+      baseURL: API_BASE_URL,
+      timeout: 10000,
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    // Append username to identify the user
+    formData.append("username", username);
+    return publicApi.post("/users/update-profile-first-login", formData);
   },
 
   /* ---------------------------------
