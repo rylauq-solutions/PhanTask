@@ -20,7 +20,7 @@ import io.jsonwebtoken.security.Keys;
  * JwtUtil handles everything related to JWT tokens in the application:
  *
  * 1. It creates two kinds of tokens:
- *      - ACCESS token: short-lived (15 min), contains username + roles.
+ *      - ACCESS token: short-lived (5 min), contains username + roles.
  *      - REFRESH token: long-lived (12 hrs), contains only username.
  *
  * 2. ACCESS tokens include user roles because they are used for authorization

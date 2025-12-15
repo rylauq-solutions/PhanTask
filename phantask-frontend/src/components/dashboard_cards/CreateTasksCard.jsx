@@ -68,7 +68,6 @@ const CreateTaskModal = ({ onClose }) => {
     { value: "USER", label: "User" },
     { value: "HR", label: "HR" },
     { value: "STUDENT", label: "Student" },
-    { value: "ADMIN", label: "Admin" }
   ];
 
   // * User Options for Dropdown (dynamically populated)
