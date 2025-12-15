@@ -48,6 +48,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // Allow registration & login
                 .requestMatchers("/api/users/change-password-first-login").permitAll() // Allow first-login change
+                .requestMatchers("/api/users/update-profile-first-login").permitAll()
                 .anyRequest().authenticated() // Protect everything else
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

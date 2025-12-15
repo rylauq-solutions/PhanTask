@@ -70,6 +70,13 @@ public class JwtFilter extends OncePerRequestFilter {
 			return;
 		}
 
+		// SKIP JWT VALIDATION FOR FIRST LOGIN ENDPOINTS
+		if (path.equals("/api/users/change-password-first-login")
+				|| path.equals("/api/users/update-profile-first-login")) {
+			chain.doFilter(req, res);
+			return;
+		}
+
 		String header = req.getHeader("Authorization");
 		String username = null;
 		String token = null;

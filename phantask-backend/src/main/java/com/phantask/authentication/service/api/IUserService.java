@@ -23,4 +23,5 @@ public interface IUserService extends UserDetailsService {
     List<UserResponse> getAllActiveUsers();
     List<UserResponse> getAllInactiveUsers();
     String editUserByAdmin(Long userId, AdminEditUserRequest req);
+    String updateProfileFirstLogin(String username, UpdateProfileRequest req);
 }

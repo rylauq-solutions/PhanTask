@@ -306,6 +306,59 @@ public class UserService implements IUserService {
         updatePassword(user, req.getNewPassword());
         return "Password changed successfully";
     }
+    
+    /**
+     * Update profile during first login (no authentication required).
+     *
+     * <p>
+     * This method allows a user to update their profile before completing
+     * the first login flow. Unlike updateProfile(), this does not require
+     * the user to be authenticated.
+     * </p>
+     *
+     * @param username the username identifying the user
+     * @param req the {@link UpdateProfileRequest} containing profile fields to update
+     * @return a success message
+     * @throws RuntimeException if user not found or profile update fails
+     */
+    @Override
+    @Transactional
+    public String updateProfileFirstLogin(String username, UpdateProfileRequest req) {
+        User user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Ensure user is in first login state
+        if (!user.isFirstLogin()) {
+            throw new RuntimeException("Profile update not allowed - user has already completed first login");
+        }
+
+        UserProfile profile = profileRepo.findByUser(user).orElseGet(() -> {
+            UserProfile p = new UserProfile();
+            p.setUser(user);
+            return p;
+        });
+
+        profile.setFullName(req.getFullName());
+        profile.setPhone(req.getPhone());
+        profile.setDepartment(req.getDepartment());
+        profile.setYearOfStudy(req.getYearOfStudy());
+        profile.setDob(req.getDob());
+        
+        // Handle profile picture if provided
+        if (req.getProfilePic() != null && !req.getProfilePic().isEmpty()) {
+            try {
+                profile.setProfilePic(req.getProfilePic().getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read profile picture", e);
+            }
+        }
+
+        profileRepo.save(profile);
+        log.info("Profile updated for first login user: {}", username);
+        
+        return "Profile updated successfully";
+    }
+
 
 	@Override
 	@PreAuthorize("hasRole('ADMIN')")

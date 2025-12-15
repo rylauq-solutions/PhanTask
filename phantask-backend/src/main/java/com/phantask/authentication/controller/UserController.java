@@ -173,6 +173,40 @@ public class UserController {
 	}
 
 	/**
+	 * Update profile during first login (no authentication required).
+	 *
+	 * <p>
+	 * This endpoint is intentionally accessible without authentication
+	 * because the user needs to update their profile before completing
+	 * the first login flow.
+	 * </p>
+	 */
+	@PostMapping(value = "/update-profile-first-login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+public ResponseEntity<String> updateProfileFirstLogin(
+        @ModelAttribute UpdateProfileRequest req) {
+    
+    log.info("=== UPDATE PROFILE FIRST LOGIN CALLED ===");  // ✅ ADD THIS
+    log.info("Username from request: {}", req.getUsername());  // ✅ ADD THIS
+    
+    String username = req.getUsername();
+    
+    if (username == null || username.isEmpty()) {
+        return ResponseEntity.badRequest()
+            .body("Username is required for first login profile update");
+    }
+    
+    try {
+        return ResponseEntity.ok(userService.updateProfileFirstLogin(username, req));
+    } catch (RuntimeException ex) {
+        log.error("Error in updateProfileFirstLogin: {}", ex.getMessage());  // ✅ ADD THIS
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(ex.getMessage());
+    }
+}
+
+
+	
+	/**
 	 * Retrieve the profile of the currently authenticated user.
 	 *
 	 * @param auth the Spring Security {@link Authentication} object for the current
