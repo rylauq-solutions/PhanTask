@@ -4,16 +4,16 @@
 // ! Centralized role definitions - fetched dynamically from backend
 // ? This file provides utilities to work with roles from your database
 
-// * ============================================================================
-// * DEFAULT FALLBACK ROLES
-// * ============================================================================
-// ! Used only if API call fails - update these to match your DB enum
-export const DEFAULT_ROLES = ["USER", "TRAINEE", "ADMIN"];
+import { apiService } from "../services/api";
 
-export const DEFAULT_ROLE_OPTIONS = [
-  { value: "USER", label: "User" },
+// * ============================================================================
+// * DEFAULT FALLBACK ROLES (Editable - will be updated from DB)
+// * ============================================================================
+
+export let DEFAULT_ROLE_OPTIONS = [
   { value: "TRAINEE", label: "Trainee" },
-  { value: "ADMIN", label: "Admin" },
+  { value: "USER", label: "User" },
+  { value: "ADMIN", label: "Admin" }, // Always last
 ];
 
 // * ============================================================================
@@ -31,28 +31,25 @@ export const ROLES = {
 
 /**
  * Transforms backend roles array to React-Select options format
+ * ADMIN is always sorted to the end of the array
  * @param {string[]} rolesArray - Array of role strings from backend
- * @returns {Array<{value: string, label: string}>} - Formatted options
- *
- * @example
- * ! transformRolesToOptions(["USER", "TRAINEE"])
- * Returns: [
- *   { value: "USER", label: "User" },
- *   { value: "TRAINEE", label: "Trainee" }
- * ]
+ * @returns {Array<{value: string, label: string}>}
  */
-export const transformRolesToOptions = (rolesArray) => {
+const transformRolesToOptions = (rolesArray) => {
   if (!rolesArray || !Array.isArray(rolesArray)) {
-    console.warn("Invalid roles array, using defaults");
     return DEFAULT_ROLE_OPTIONS;
   }
 
-  return rolesArray.map((role) => {
-    // Capitalize first letter: "USER" -> "User", "TRAINEE" -> "Trainee"
-    return {
-      value: role,
-      label: role.charAt(0) + role.slice(1).toLowerCase(),
-    };
+  const options = rolesArray.map((role) => ({
+    value: role,
+    label: role.charAt(0) + role.slice(1).toLowerCase(),
+  }));
+
+  // Sort: ADMIN always last, others alphabetically
+  return options.sort((a, b) => {
+    if (a.value === ROLES.ADMIN) return 1; // ADMIN goes to end
+    if (b.value === ROLES.ADMIN) return -1; // ADMIN goes to end
+    return a.label.localeCompare(b.label); // Others sorted alphabetically
   });
 };
 
@@ -61,7 +58,7 @@ export const transformRolesToOptions = (rolesArray) => {
  * @param {Array<{value: string, label: string}>} roleOptions
  * @returns {Array<{value: string, label: string}>}
  */
-export const filterOutAdmin = (roleOptions) => {
+const filterOutAdmin = (roleOptions) => {
   return roleOptions.filter((role) => role.value !== ROLES.ADMIN);
 };
 
@@ -70,7 +67,7 @@ export const filterOutAdmin = (roleOptions) => {
  * @param {Array<{value: string, label: string}>} roleOptions
  * @returns {Array<{value: string, label: string}>}
  */
-export const addPlaceholder = (roleOptions) => {
+const addPlaceholder = (roleOptions) => {
   return [{ value: "", label: "Select Role..." }, ...roleOptions];
 };
 
@@ -79,6 +76,47 @@ export const addPlaceholder = (roleOptions) => {
  * @param {Array<{value: string, label: string}>} roleOptions
  * @returns {Array<{value: string, label: string}>}
  */
-export const getRoleOptionsWithoutAdmin = (roleOptions) => {
+export const getRoleOptionsWithoutAdmin = (
+  roleOptions = DEFAULT_ROLE_OPTIONS
+) => {
   return addPlaceholder(filterOutAdmin(roleOptions));
 };
+
+// * ============================================================================
+// * FETCH ROLES FROM BACKEND AND UPDATE DEFAULT_ROLE_OPTIONS
+// * ============================================================================
+
+let isRolesFetched = false; // Track if roles have been fetched
+
+/**
+ * Fetch roles from backend and update the DEFAULT_ROLE_OPTIONS constant
+ * Should be called ONLY after ADMIN login
+ */
+export const refreshRolesFromBackend = async () => {
+  // Prevent multiple fetches
+  if (isRolesFetched) {
+    console.log("ℹ️ Roles already fetched, skipping...");
+    return DEFAULT_ROLE_OPTIONS;
+  }
+
+  try {
+    const response = await apiService.getAllRoles();
+    const rolesArray = response.data || [];
+
+    console.log("✅ Fetched roles from backend:", rolesArray);
+
+    // Update the exported constant (with ADMIN always last)
+    DEFAULT_ROLE_OPTIONS = transformRolesToOptions(rolesArray);
+    isRolesFetched = true;
+
+    return DEFAULT_ROLE_OPTIONS;
+  } catch (error) {
+    console.warn(
+      "⚠️ Failed to fetch roles from backend, using defaults:",
+      error
+    );
+    return DEFAULT_ROLE_OPTIONS;
+  }
+};
+
+// * REMOVED auto-fetch - will be called manually after ADMIN login
