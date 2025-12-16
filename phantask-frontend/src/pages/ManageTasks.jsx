@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import LoadingSkeleton from "../components/LoadingSkeleton";
 import { FaFilter } from "react-icons/fa";
 import Select from "react-select";
+import { getRoleOptionsWithoutAdmin, DEFAULT_ROLE_OPTIONS } from "../constants/roles";
 
 // * ============================================================================
 // * MANAGE TASKS COMPONENT
@@ -812,13 +813,9 @@ const EditTaskModal = ({ task, onClose, onSuccess }) => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // * Role Options for Dropdown
-    const roleOptions = [
-        { value: "", label: "Select Role..." },
-        { value: "USER", label: "User" },
-        { value: "HR", label: "HR" },
-        { value: "STUDENT", label: "Student" },
-    ];
+    // * Role Options for Dropdown (from constants, without ADMIN)
+    const roleOptions = getRoleOptionsWithoutAdmin(DEFAULT_ROLE_OPTIONS);
+
 
     // * User Options for Dropdown (dynamically populated)
     const userOptions = [

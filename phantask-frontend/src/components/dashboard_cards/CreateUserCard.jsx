@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { apiService } from "../../services/api";
 import { toast } from "react-hot-toast";
 import Select from "react-select";
+import { DEFAULT_ROLE_OPTIONS } from "../../constants/roles";
 
 // ! Main Component - Create User Card
 const CreateUserCard = () => {
@@ -59,13 +60,9 @@ const CreateUserModal = ({ onClose }) => {
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
 
-  // * Role Options for Dropdown
-  const roleOptions = [
-    { value: "USER", label: "User" },
-    { value: "HR", label: "HR" },
-    { value: "STUDENT", label: "Student" },
-    { value: "ADMIN", label: "Admin" },
-  ];
+  // * Role Options for Dropdown (from constants)
+  const roleOptions = DEFAULT_ROLE_OPTIONS;
+
 
   // * Custom Styles for React-Select (matching email input styling)
   const selectStyles = {
