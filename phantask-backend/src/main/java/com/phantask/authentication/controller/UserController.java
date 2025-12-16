@@ -185,8 +185,8 @@ public class UserController {
 public ResponseEntity<String> updateProfileFirstLogin(
         @ModelAttribute UpdateProfileRequest req) {
     
-    log.info("=== UPDATE PROFILE FIRST LOGIN CALLED ===");  // ✅ ADD THIS
-    log.info("Username from request: {}", req.getUsername());  // ✅ ADD THIS
+    log.info("=== UPDATE PROFILE FIRST LOGIN CALLED ==="); 
+    log.info("Username from request: {}", req.getUsername());
     
     String username = req.getUsername();
     
@@ -198,7 +198,7 @@ public ResponseEntity<String> updateProfileFirstLogin(
     try {
         return ResponseEntity.ok(userService.updateProfileFirstLogin(username, req));
     } catch (RuntimeException ex) {
-        log.error("Error in updateProfileFirstLogin: {}", ex.getMessage());  // ✅ ADD THIS
+        log.error("Error in updateProfileFirstLogin: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
             .body(ex.getMessage());
     }
