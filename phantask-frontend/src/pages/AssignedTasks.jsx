@@ -4,16 +4,13 @@ import { apiService } from "../services/api";
 import { toast } from "react-hot-toast";
 import { FaFilter } from "react-icons/fa";
 
-
 const AssignedTasks = () => {
   const { user, loading } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [taskLoading, setTaskLoading] = useState(false);
 
-
   // Filter state: ALL, PENDING, SUBMITTED
   const [filter, setFilter] = useState("ALL");
-
 
   // Fetch tasks
   useEffect(() => {
@@ -32,13 +29,7 @@ const AssignedTasks = () => {
     fetchTasks();
   }, [user]);
 
-
-  // console.log(tasks);
-
-
-
   if (loading || taskLoading) return <div>Loading tasks...</div>;
-
 
   // Filter tasks based on selected filter
   const filteredTasks = tasks.filter((t) => {
@@ -48,16 +39,13 @@ const AssignedTasks = () => {
     return true;
   });
 
-
   const pendingTasks = filteredTasks
     .filter((t) => t.status === "PENDING")
     .sort((a, b) => new Date(b.assignDate) - new Date(a.assignDate));
 
-
   const completedTasks = filteredTasks
     .filter((t) => t.status === "SUBMITTED")
     .sort((a, b) => new Date(b.uploadDateTime) - new Date(a.uploadDateTime));
-
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
@@ -67,20 +55,17 @@ const AssignedTasks = () => {
       .padStart(2, "0")}-${d.getFullYear()}`;
   };
 
-
   // Modal state
   const [selectedTask, setSelectedTask] = useState(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-
   const openModal = (task) => {
     setSelectedTask(task);
     setConfirmVisible(false);
     setConfirmed(false);
   };
-
 
   const closeModal = () => {
     setSelectedTask(null);
@@ -89,10 +74,8 @@ const AssignedTasks = () => {
     setSubmitting(false);
   };
 
-
   const handleSubmitClick = async () => {
     if (!confirmed || !selectedTask) return;
-
 
     setSubmitting(true);
     try {
@@ -112,7 +95,6 @@ const AssignedTasks = () => {
       setSubmitting(false);
     }
   };
-
 
   // Task Card Component
   const TaskCard = ({ task, isPending }) => (
@@ -137,36 +119,32 @@ const AssignedTasks = () => {
     </div>
   );
 
-
-  // Modal Component
+  // Modal Component - NO ANIMATION
   const Modal = () => {
     if (!selectedTask) return null;
     const isPending = selectedTask.status === "PENDING";
 
-
     return (
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center"
-        aria-modal="true"
-        role="dialog"
-      >
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        {/* Background Overlay */}
         <div className="absolute inset-0 bg-black/40" onClick={closeModal} />
-        <div className="relative w-[90%] sm:w-[85%] md:w-3/5 lg:w-2/5 max-h-[95vh] animate-slideUp">
+
+        {/* Modal Container - NO ANIMATION */}
+        <div className="relative w-[90%] sm:w-[85%] md:w-3/5 lg:w-2/5 max-h-[95vh]">
           <div
-            className="bg-white rounded-xl p-4 md:p-6 shadow-xl max-h-[95vh] overflow-y-auto flex flex-col"
+            className="bg-white rounded-xl p-4 md:p-6 shadow-xl flex flex-col max-h-[95vh] overflow-y-auto"
             style={{ border: `2px solid ${isPending ? "#FACC15" : "#22C55E"}` }}
           >
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-xl font-bold">{selectedTask.taskName}</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  <span className="font-semibold">Created By:</span> {selectedTask.createdBy}
-                </p>
-              </div>
+            {/* Header Section */}
+            <div className="mb-3 flex-shrink-0">
+              <h3 className="text-2xl font-bold text-amber-950">{selectedTask.taskName}</h3>
+              <p className="text-sm text-gray-700 mt-1">
+                <span className="font-semibold">Created By:</span> {selectedTask.createdBy}
+              </p>
             </div>
 
-
-            <div className="mt-4 flex-1 overflow-auto">
+            {/* Body Section - Task Details */}
+            <div className="flex-1 flex flex-col gap-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <p className="text-xs text-gray-600 font-medium">Assign Date</p>
@@ -174,7 +152,9 @@ const AssignedTasks = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-600 font-medium">Upload Date</p>
-                  <p className="text-sm">{selectedTask.uploadDateTime ? formatDate(selectedTask.uploadDateTime) : "-"}</p>
+                  <p className="text-sm">
+                    {selectedTask.uploadDateTime ? formatDate(selectedTask.uploadDateTime) : "-"}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-600 font-medium">Due Date</p>
@@ -185,27 +165,27 @@ const AssignedTasks = () => {
                   <p className="text-sm">{selectedTask.status}</p>
                 </div>
               </div>
-              <div className="mt-4">
+              <div className="mt-1">
                 <p className="text-xs text-gray-600 font-medium">Description</p>
                 <p className="text-sm whitespace-pre-wrap mt-1">{selectedTask.description}</p>
               </div>
             </div>
 
-
-            <div className="mt-4">
+            {/* Footer Section - Action Buttons */}
+            <div className="mt-4 flex-shrink-0">
               {isPending ? (
                 <>
                   {!confirmVisible ? (
                     <div className="flex gap-2">
                       <button
                         onClick={() => setConfirmVisible(true)}
-                        className="flex-1 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 border-yellow-500 hover:scale-95 transition-transform duration-300"
+                        className="flex-1 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 font-semibold hover:scale-95 transition-transform duration-300 shadow"
                       >
                         Submit Task
                       </button>
                       <button
                         onClick={closeModal}
-                        className="hover:scale-95 transition-transform duration-300 flex-1 py-2 rounded-lg border bg-stone-200 border-gray-200"
+                        className="flex-1 py-2 rounded-lg bg-stone-200 hover:bg-stone-300 text-gray-800 font-semibold hover:scale-95 transition-transform duration-300 shadow"
                       >
                         Close
                       </button>
@@ -222,12 +202,13 @@ const AssignedTasks = () => {
                         I hereby declare the task is completed to the best of my ability.
                       </label>
 
-
                       <div className="flex gap-2">
                         <button
                           onClick={handleSubmitClick}
                           disabled={!confirmed || submitting}
-                          className={`hover:scale-95 transition-transform duration-300 flex-1 py-2 rounded-lg text-white ${confirmed ? "bg-green-600 hover:bg-green-700" : "bg-green-600/60 cursor-not-allowed"
+                          className={`flex-1 py-2 rounded-lg text-white font-semibold hover:scale-95 transition-transform duration-300 shadow ${confirmed
+                              ? "bg-green-600 hover:bg-green-700"
+                              : "bg-green-600/60 cursor-not-allowed"
                             }`}
                         >
                           {submitting ? "Submitting..." : "Confirm & Submit"}
@@ -237,7 +218,7 @@ const AssignedTasks = () => {
                             setConfirmVisible(false);
                             setConfirmed(false);
                           }}
-                          className="hover:scale-95 transition-transform duration-300 flex-1 py-2 rounded-lg border bg-stone-200 border-stone-200"
+                          className="flex-1 py-2 rounded-lg bg-stone-200 hover:bg-stone-300 text-gray-800 font-semibold hover:scale-95 transition-transform duration-300 shadow"
                         >
                           Cancel
                         </button>
@@ -249,7 +230,7 @@ const AssignedTasks = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={closeModal}
-                    className="hover:scale-95 transition-transform duration-300 flex-1 py-2 rounded-lg border bg-stone-200 border-gray-200"
+                    className="flex-1 py-2 rounded-lg bg-stone-200 hover:bg-stone-300 text-gray-800 font-semibold hover:scale-95 transition-transform duration-300 shadow"
                   >
                     Close
                   </button>
@@ -259,20 +240,32 @@ const AssignedTasks = () => {
           </div>
         </div>
 
-        {/* Animation styles */}
+        {/* Custom Scrollbar */}
         <style>
           {`
-            @keyframes slideUp {
-              0% { transform: translateY(100%); opacity: 0; }
-              100% { transform: translateY(0); opacity: 1; }
+            /* Custom scrollbar styling for modal */
+            .overflow-y-auto::-webkit-scrollbar {
+              width: 8px;
             }
-            .animate-slideUp { animation: slideUp 0.2s ease-out forwards; }
+
+            .overflow-y-auto::-webkit-scrollbar-track {
+              background: transparent;
+              margin: 0.4rem 0;
+            }
+
+            .overflow-y-auto::-webkit-scrollbar-thumb {
+              background: #d1d5db;
+              border-radius: 8px;
+            }
+
+            .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+              background: #9ca3af;
+            }
           `}
         </style>
       </div>
     );
   };
-
 
   // Task Section Component
   const TaskSection = ({ tasks, isPending }) => (
@@ -286,7 +279,6 @@ const AssignedTasks = () => {
       >
         {isPending ? "Pending Tasks" : "Completed Tasks"}
       </h2>
-
 
       {tasks.length === 0 ? (
         <p className="text-center text-gray-500 py-6">
@@ -302,15 +294,14 @@ const AssignedTasks = () => {
     </div>
   );
 
-
   // Filter Bar Component
   const FilterBar = () => (
     <div className="flex flex-wrap justify-center gap-2 mb-4">
       <button
         onClick={() => setFilter("ALL")}
         className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition-colors duration-300 ${filter === "ALL"
-          ? "bg-orange-500 text-white"
-          : "bg-white border border-gray-300 text-gray-700 hover:bg-orange-100"
+            ? "bg-orange-500 text-white"
+            : "bg-white border border-gray-300 text-gray-700 hover:bg-orange-100"
           }`}
       >
         <FaFilter /> All
@@ -318,8 +309,8 @@ const AssignedTasks = () => {
       <button
         onClick={() => setFilter("PENDING")}
         className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition-colors duration-300 ${filter === "PENDING"
-          ? "bg-yellow-500 text-white"
-          : "bg-white border border-gray-300 text-gray-700 hover:bg-yellow-100"
+            ? "bg-yellow-500 text-white"
+            : "bg-white border border-gray-300 text-gray-700 hover:bg-yellow-100"
           }`}
       >
         <FaFilter /> Pending
@@ -327,15 +318,14 @@ const AssignedTasks = () => {
       <button
         onClick={() => setFilter("SUBMITTED")}
         className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition-colors duration-300 ${filter === "SUBMITTED"
-          ? "bg-green-600 text-white"
-          : "bg-white border border-gray-300 text-gray-700 hover:bg-green-100"
+            ? "bg-green-600 text-white"
+            : "bg-white border border-gray-300 text-gray-700 hover:bg-green-100"
           }`}
       >
         <FaFilter /> Submitted
       </button>
     </div>
   );
-
 
   return (
     <div className="space-y-6 p-4">
@@ -345,10 +335,8 @@ const AssignedTasks = () => {
         </h1>
       </div>
 
-
       {/* Filter Bar */}
       <FilterBar />
-
 
       {filteredTasks.length === 0 && (
         <main className="w-full h-full flex flex-col items-center justify-center p-4">
@@ -359,16 +347,12 @@ const AssignedTasks = () => {
         </main>
       )}
 
-
       {pendingTasks.length > 0 && <TaskSection tasks={pendingTasks} isPending={true} />}
       {completedTasks.length > 0 && <TaskSection tasks={completedTasks} isPending={false} />}
-
 
       <Modal />
     </div>
   );
 };
 
-
 export default AssignedTasks;
-  
