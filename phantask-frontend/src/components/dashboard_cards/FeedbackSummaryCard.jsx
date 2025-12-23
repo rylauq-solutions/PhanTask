@@ -1,11 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { apiService } from '../../services/api';
 
 const FeedbackSummaryCard = () => {
-  // Example data for feedback form statuses
+  const [submittedCount, setSubmittedCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeedbackCounts = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch total submitted feedbacks count
+        const submittedRes = await apiService.getSubmittedFeedbackCount();
+        setSubmittedCount(submittedRes.data || 0);
+
+        // Fetch available (pending) feedbacks
+        const availableRes = await apiService.getAvailableFeedbackForUser();
+        setPendingCount(availableRes.data?.length || 0);
+      } catch (err) {
+        console.error('Failed to fetch feedback counts:', err);
+        setSubmittedCount(0);
+        setPendingCount(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeedbackCounts();
+  }, []);
+
   const feedbackStatus = [
-    { type: 'Submitted', count: 8 },
-    { type: 'Pending', count: 2 },
+    { type: 'Submitted', count: submittedCount },
+    { type: 'Pending', count: pendingCount },
   ];
 
   return (
@@ -17,19 +45,23 @@ const FeedbackSummaryCard = () => {
         </h2>
 
         <main className='w-full h-full flex flex-col justify-center items-center'>
-          <ul className="w-full space-y-3">
-            {feedbackStatus.map(({ type, count }) => (
-              <li key={type} className="flex justify-between items-center text-[#522320] text-sm font-medium">
-                <span>{type} Forms</span>
-                <span className={`font-bold px-3 py-1.5 rounded-full text-sm ${type === 'Pending'
+          {loading ? (
+            <p className="text-sm text-gray-500">Loading...</p>
+          ) : (
+            <ul className="w-full space-y-3">
+              {feedbackStatus.map(({ type, count }) => (
+                <li key={type} className="flex justify-between items-center text-[#522320] text-sm font-medium">
+                  <span>{type} Feedbacks</span>
+                  <span className={`font-bold px-3 py-1.5 rounded-full text-sm ${type === 'Pending'
                     ? 'bg-red-600 text-[#fff1f0]'
                     : 'bg-green-600 text-white'
-                  }`}>
-                  {count}
-                </span>
-              </li>
-            ))}
-          </ul>
+                    }`}>
+                    {count}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </main>
 
         <Link to={'/feedback'} className='w-full'>
