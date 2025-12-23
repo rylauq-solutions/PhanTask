@@ -284,6 +284,31 @@ export const apiService = {
   getMySubmittedTasks: () => api.get("/tasks/my/submitted"),
   submitTask: (taskId, driveUrl) =>
     api.put(`/tasks/my/submit/${taskId}`, { driveUrl }),
+
+  /* ---------------------------------
+   *     FEEDBACK (ADMIN)
+   * --------------------------------- */
+  createFeedback: (feedbackData) =>
+    api.post("/feedback/admin/create", feedbackData),
+
+  getAllFeedbackTemplates: () => api.get("/feedback/admin/all"),
+
+  updateFeedbackTemplate: (id, feedbackData) =>
+    api.put(`/feedback/admin/update/${id}`, feedbackData),
+
+  deleteFeedbackTemplate: (id) => api.delete(`/feedback/admin/delete/${id}`),
+
+  getFeedbackReport: (id) => api.get(`/feedback/admin/report/${id}`),
+
+  /* ---------------------------------
+   *     FEEDBACK (USER)
+   * --------------------------------- */
+  getAvailableFeedbackForUser: () => api.get("/feedback/user/available"),
+
+  submitFeedback: (id, ratings) =>
+    api.post(`/feedback/user/${id}/submit`, { ratings }),
+
+  getSubmittedFeedbackCount: () => api.get("/feedback/user/count"),
 };
 
 export default api;

@@ -21,6 +21,7 @@ import ManageTasks from "./pages/ManageTasks";
 import ManageUsers from "./pages/ManageUsers";
 import Notices from "./pages/Notices.jsx";
 import ManageNotices from "./pages/ManageNotices.jsx";
+import ManageFeedbacks from "./pages/ManageFeedbacks.jsx";
 
 const AppContent = () => {
   const location = useLocation();
@@ -156,6 +157,16 @@ const AppContent = () => {
             <PrivateRoute>
               <SideBar>
                 <Feedback />
+              </SideBar>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/manage-feedbacks"
+          element={
+            <PrivateRoute>
+              <SideBar>
+                <ManageFeedbacks />
               </SideBar>
             </PrivateRoute>
           }

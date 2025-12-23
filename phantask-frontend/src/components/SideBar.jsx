@@ -28,13 +28,17 @@ const SideBar = ({ children }) => {
       : { name: "Assigned Tasks", icon: "fa-clipboard-list", path: "/tasks" },
 
     // ! Users (admin only)
-    isAdmin ?
-      { name: "Manage Users", icon: "fa-users-gear", path: "/admin/manage-users" } :
-      null,
+    isAdmin
+      ? { name: "Manage Users", icon: "fa-users-gear", path: "/admin/manage-users" }
+      : null,
 
     // ! Attendance/Timesheet
     isAdmin
-      ? { name: "Timesheet", icon: "fa-calendar-check", path: "/admin/manage-attendance" }
+      ? {
+        name: "Timesheet",
+        icon: "fa-calendar-check",
+        path: "/admin/manage-attendance",
+      }
       : { name: "Attendance", icon: "fa-calendar-days", path: "/attendance" },
 
     // ! Notices
@@ -44,9 +48,23 @@ const SideBar = ({ children }) => {
 
     { name: "SocialHub", icon: "fa-comments", path: "/socialhub" },
     { name: "Helpline", icon: "fa-headset", path: "/helpline" },
-    { name: "Feedback", icon: "fa-comment-dots", path: "/feedback" },
+
+    // ! Feedbacks (icons changed here)
+    isAdmin
+      ? {
+        name: "Manage Feedbacks",
+        icon: "fa-chart-simple",      // changed from fa-bullhorn
+        path: "/admin/manage-feedbacks",
+      }
+      : {
+        name: "Feedback",
+        icon: "fa-message",           // changed from fa-comment-dots if you want
+        path: "/feedback",
+      },
+
     { name: "Settings", icon: "fa-gear", path: "/settings" },
-  ].filter(Boolean); // remove nulls
+  ].filter(Boolean);
+
 
 
   // Called when logo <img> is clicked (desktop or mobile)

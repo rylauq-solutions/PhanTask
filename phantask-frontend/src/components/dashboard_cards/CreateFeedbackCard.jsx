@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import Select from "react-select";
 import { getRoleOptionsWithoutAdmin, DEFAULT_ROLE_OPTIONS } from "../../constants/roles";
+import { apiService } from "../../services/api";
 
 // ! Main Component - Create Feedback Card
 const CreateFeedbackCard = () => {
@@ -212,11 +213,10 @@ const CreateFeedbackModal = ({ onClose }) => {
 
     // * Handle Feedback Creation
     const handleCreateFeedback = async () => {
-        // Validation
         if (!title.trim()) return toast.error("Feedback title is required");
         if (assignedRoles.length === 0) return toast.error("At least one role must be selected");
 
-        const validQuestions = questions.filter(q => q.trim() !== "");
+        const validQuestions = questions.filter((q) => q.trim() !== "");
         if (validQuestions.length === 0) return toast.error("At least one question is required");
 
         if (!confirmed) return toast.error("Please confirm before proceeding");
@@ -224,26 +224,28 @@ const CreateFeedbackModal = ({ onClose }) => {
         try {
             setLoading(true);
 
-            // Prepare data payload
             const feedbackData = {
                 title: title.trim(),
-                assignedRoles: assignedRoles.map(role => role.value),
-                questions: validQuestions
+                assignedRoles: assignedRoles.map((role) => role.value),
+                questions: validQuestions,
             };
 
-            console.log("Feedback Data:", feedbackData);
+            const res = await apiService.createFeedback(feedbackData);
 
-            // TODO: Replace with actual API call when backend is ready
-            // const res = await apiService.createFeedback(feedbackData);
-
-            toast.success("Feedback form created successfully!", { duration: 3000 });
+            toast.success(res?.data || "Feedback form created successfully!", { duration: 3000 });
             onClose();
         } catch (err) {
-            toast.error(err?.response?.data?.error || "Failed to create feedback");
+            toast.error(
+                typeof err?.response?.data === "string"
+                    ? err.response.data
+                    : err?.response?.data?.error || "Failed to create feedback"
+            );
+
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
