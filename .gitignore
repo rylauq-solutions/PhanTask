@@ -1,4 +1,4 @@
 /.metadata/
 /phantask-backend/bin/
 phantask-backend/src/main/resources/application-secrets.properties
-PhanTask/
+#PhanTask/
