@@ -222,7 +222,7 @@ export const apiService = {
   refreshAccessToken,
 
   /* ---------------------------------
-   *      CHANGE PASSWORD ON FIRST LOGIN
+   *      CHANGE PASSWORD ON FIRST LOGIN (NO AUTH REQUIRED)
    * --------------------------------- */
   changePasswordFirstLogin: async (oldPassword, newPassword, username) => {
     const publicApi = axios.create({
@@ -262,7 +262,6 @@ export const apiService = {
   /* ---------------------------------
    *      DASHBOARD DATA
    * --------------------------------- */
-  // getMyPendingTasks: () => api.get("/tasks/my/pending"), // Already defined below
   getAttendance: () => api.get("/attendance/current"),
   getSchedule: () => api.get("/schedule/today"),
   getNotices: () => api.get("/notices/active"),
@@ -290,25 +289,35 @@ export const apiService = {
    * --------------------------------- */
   createFeedback: (feedbackData) =>
     api.post("/feedback/admin/create", feedbackData),
-
   getAllFeedbackTemplates: () => api.get("/feedback/admin/all"),
-
   updateFeedbackTemplate: (id, feedbackData) =>
     api.put(`/feedback/admin/update/${id}`, feedbackData),
-
   deleteFeedbackTemplate: (id) => api.delete(`/feedback/admin/delete/${id}`),
-
   getFeedbackReport: (id) => api.get(`/feedback/admin/report/${id}`),
 
   /* ---------------------------------
    *     FEEDBACK (USER)
    * --------------------------------- */
   getAvailableFeedbackForUser: () => api.get("/feedback/user/available"),
-
   submitFeedback: (id, ratings) =>
     api.post(`/feedback/user/${id}/submit`, { ratings }),
-
   getSubmittedFeedbackCount: () => api.get("/feedback/user/count"),
+
+  /* ---------------------------------
+   *     NOTICE MANAGEMENT (ADMIN)
+   * --------------------------------- */
+  createNotice: (noticeData) => api.post("/notices/admin/create", noticeData),
+  updateNotice: (noticeId, noticeData) =>
+    api.put(`/notices/admin/update/${noticeId}`, noticeData),
+  deleteNotice: (noticeId) => api.delete(`/notices/admin/delete/${noticeId}`),
+  getAllNoticesAdmin: () => api.get("/notices/admin/all"),
+
+  /* ---------------------------------
+   *     NOTICE MANAGEMENT (USER)
+   * --------------------------------- */
+  getMyNotices: () => api.get("/notices/my"),
+  getNoticesByPriority: (priority) =>
+    api.get(`/notices/my/priority/${priority}`),
 };
 
 export default api;
