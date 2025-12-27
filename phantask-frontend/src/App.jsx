@@ -3,7 +3,6 @@ import SideBar from "./components/SideBar";
 import { Routes, Route, BrowserRouter, useLocation } from "react-router-dom";
 import Dashboard from "./pages/dashboard/Dashboard.jsx";
 import Attendance from "./pages/Attendance";
-import SocialHub from "./pages/SocialHub";
 import Helpline from "./pages/Helpline";
 import Feedback from "./pages/Feedback";
 import Settings from "./pages/Settings";
@@ -126,7 +125,7 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <SideBar>
-                <SocialHub />
+                {/* <SocialHub /> */}
               </SideBar>
             </PrivateRoute>
           }

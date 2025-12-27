@@ -186,12 +186,15 @@ const ManageFeedbacks = () => {
             const res = await apiService.getAllFeedbackTemplates();
             const allFeedbacks = res.data || [];
 
-
             // Separate pending (0 submissions) vs in-progress (>0 submissions)
             // Backend now returns submissionCount directly
-            const pending = allFeedbacks.filter((fb) => fb.submissionCount === 0);
-            const inProgress = allFeedbacks.filter((fb) => fb.submissionCount > 0);
+            const pending = allFeedbacks
+                .filter((fb) => fb.submissionCount === 0)
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+            const inProgress = allFeedbacks
+                .filter((fb) => fb.submissionCount > 0)
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
             setPendingFeedbacks(pending);
             setInProgressFeedbacks(inProgress);

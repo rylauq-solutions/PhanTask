@@ -293,24 +293,7 @@ const Feedback = () => {
         </h1>
       </div>
 
-      {/* Search */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-2">
-        <div className="flex items-center justify-center md:justify-start gap-2">
-          <FaFilter className="text-gray-500" />
-          <span className="text-sm text-gray-700">
-            Available Feedback Forms
-          </span>
-        </div>
-        <div className="flex justify-center md:justify-end">
-          <input
-            type="text"
-            placeholder="Search by title..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full md:w-64 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600"
-          />
-        </div>
-      </div>
+
 
       {/* Empty state */}
       {filteredFeedbacks.length === 0 && (
@@ -328,16 +311,37 @@ const Feedback = () => {
 
       {/* Cards */}
       {filteredFeedbacks.length > 0 && (
-        <div className="border border-amber-400 rounded-xl p-4 bg-white/80 shadow-sm">
-          <h2 className="text-xl font-bold mb-3 text-center md:text-left text-amber-700">
-            Available Feedbacks
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredFeedbacks.map((fb) => (
-              <FeedbackCard key={fb.feedbackId} fb={fb} />
-            ))}
+        <>
+          {/* Search */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-2">
+            <div className="flex items-center justify-center md:justify-start gap-2">
+              <FaFilter className="text-gray-500" />
+              <span className="text-sm text-gray-700">
+                Available Feedback Forms
+              </span>
+            </div>
+            <div className="flex justify-center md:justify-end">
+              <input
+                type="text"
+                placeholder="Search by title..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full md:w-64 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600"
+              />
+            </div>
           </div>
-        </div>
+          <div className="border border-amber-400 rounded-xl p-4 bg-white/80 shadow-sm">
+            <h2 className="text-xl font-bold mb-3 text-center md:text-left text-amber-700">
+              Available Feedbacks
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredFeedbacks.map((fb) => (
+                <FeedbackCard key={fb.feedbackId} fb={fb} />
+              ))}
+            </div>
+          </div>
+
+        </>
       )}
 
       <FeedbackModal />

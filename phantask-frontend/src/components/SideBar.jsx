@@ -46,7 +46,8 @@ const SideBar = ({ children }) => {
       ? { name: "Manage Notices", icon: "fa-bullhorn", path: "/admin/manage-notices" }
       : { name: "Notices", icon: "fa-clipboard", path: "/notices" },
 
-    { name: "SocialHub", icon: "fa-comments", path: "/socialhub" },
+    // TODO in Future: { name: "SocialHub", icon: "fa-comments", path: "/socialhub" },
+
     { name: "Helpline", icon: "fa-headset", path: "/helpline" },
 
     // ! Feedbacks (icons changed here)
@@ -64,7 +65,6 @@ const SideBar = ({ children }) => {
 
     { name: "Settings", icon: "fa-gear", path: "/settings" },
   ].filter(Boolean);
-
 
 
   // Called when logo <img> is clicked (desktop or mobile)
