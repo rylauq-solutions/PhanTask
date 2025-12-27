@@ -22,6 +22,15 @@ const SideBar = ({ children }) => {
   const menuItems = [
     { name: "Dashboard", icon: "fa-house", path: "/" },
 
+    // ! Attendance/Timesheet
+    isAdmin
+      ? {
+        name: "Timesheet",
+        icon: "fa-calendar-check",
+        path: "/admin/manage-attendance",
+      }
+      : { name: "Attendance", icon: "fa-calendar-days", path: "/attendance" },
+
     // ! Tasks
     isAdmin
       ? { name: "Manage Tasks", icon: "fa-list-check", path: "/admin/manage-tasks" }
@@ -32,23 +41,12 @@ const SideBar = ({ children }) => {
       ? { name: "Manage Users", icon: "fa-users-gear", path: "/admin/manage-users" }
       : null,
 
-    // ! Attendance/Timesheet
-    isAdmin
-      ? {
-        name: "Timesheet",
-        icon: "fa-calendar-check",
-        path: "/admin/manage-attendance",
-      }
-      : { name: "Attendance", icon: "fa-calendar-days", path: "/attendance" },
-
     // ! Notices
     isAdmin
       ? { name: "Manage Notices", icon: "fa-bullhorn", path: "/admin/manage-notices" }
       : { name: "Notices", icon: "fa-clipboard", path: "/notices" },
 
     // TODO in Future: { name: "SocialHub", icon: "fa-comments", path: "/socialhub" },
-
-    { name: "Helpline", icon: "fa-headset", path: "/helpline" },
 
     // ! Feedbacks (icons changed here)
     isAdmin
@@ -62,6 +60,8 @@ const SideBar = ({ children }) => {
         icon: "fa-message",           // changed from fa-comment-dots if you want
         path: "/feedback",
       },
+
+    { name: "Helpline", icon: "fa-headset", path: "/helpline" },
 
     { name: "Settings", icon: "fa-gear", path: "/settings" },
   ].filter(Boolean);
