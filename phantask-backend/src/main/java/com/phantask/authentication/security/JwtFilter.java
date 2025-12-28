@@ -59,20 +59,11 @@ public class JwtFilter extends OncePerRequestFilter {
 			throws ServletException, IOException, java.io.IOException {
 
 		String path = req.getServletPath();
-		if (path.startsWith("/api/auth/")) {
-			chain.doFilter(req, res);
-			return;
-		}
-
-		// SKIP JWT VALIDATION FOR FIRST LOGIN
-		if (path.endsWith("/api/users/change-password-first-login")) {
-			chain.doFilter(req, res);
-			return;
-		}
-
-		// SKIP JWT VALIDATION FOR FIRST LOGIN ENDPOINTS
-		if (path.equals("/api/users/change-password-first-login")
-				|| path.equals("/api/users/update-profile-first-login")) {
+		
+		// SKIP JWT VALIDATION FOR PUBLIC ENDPOINTS
+		if (path.startsWith("/api/auth/") || 
+		    path.equals("/api/users/change-password-first-login") ||
+		    path.equals("/api/users/update-profile-first-login")) {
 			chain.doFilter(req, res);
 			return;
 		}
@@ -81,26 +72,57 @@ public class JwtFilter extends OncePerRequestFilter {
 		String username = null;
 		String token = null;
 
+		// Extract token from Authorization header
 		if (header != null && header.startsWith("Bearer ")) {
 			token = header.substring(7);
 			try {
 				username = jwtUtil.extractUsername(token);
 			} catch (ExpiredJwtException e) {
+				// Token expired - send 401 and stop processing
 				res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				res.getWriter().write("Token expired, please login again");
+				res.setContentType("application/json");
+				res.getWriter().write("{\"error\": \"Token expired, please login again\"}");
+				return;
+			} catch (Exception e) {
+				// Invalid token - send 401 and stop processing
+				res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				res.setContentType("application/json");
+				res.getWriter().write("{\"error\": \"Invalid token\"}");
 				return;
 			}
 		}
 
+		// If we have a valid username from the token, authenticate the user
 		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-			UserDetails userDetails = userService.loadUserByUsername(username);
-			if (jwtUtil.isTokenValid(token, userDetails)) {
-				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
-						null, userDetails.getAuthorities());
-				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
-				SecurityContextHolder.getContext().setAuthentication(authToken);
+			try {
+				UserDetails userDetails = userService.loadUserByUsername(username);
+				
+				// Validate token and set authentication
+				if (jwtUtil.isTokenValid(token, userDetails)) {
+					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+						userDetails,
+						null, 
+						userDetails.getAuthorities()
+					);
+					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
+					SecurityContextHolder.getContext().setAuthentication(authToken);
+				} else {
+					// Token validation failed - send 403
+					res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+					res.setContentType("application/json");
+					res.getWriter().write("{\"error\": \"Invalid or expired token\"}");
+					return;
+				}
+			} catch (Exception e) {
+				// User not found or other error - send 403
+				res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+				res.setContentType("application/json");
+				res.getWriter().write("{\"error\": \"Authentication failed\"}");
+				return;
 			}
 		}
+		
+		// Continue with the filter chain
 		chain.doFilter(req, res);
 	}
 }

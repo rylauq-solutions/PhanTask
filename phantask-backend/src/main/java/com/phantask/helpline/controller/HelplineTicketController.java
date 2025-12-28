@@ -20,182 +20,169 @@ import com.phantask.helpline.service.HelplineTicketService;
 import lombok.RequiredArgsConstructor;
 
 /**
- * REST Controller for Helpline Ticket operations
- * Handles raising, viewing, and resolving tickets
+ * REST Controller for Helpline Ticket operations Handles raising, viewing, and
+ * resolving tickets
  */
 @RestController
 @RequestMapping("/api/helpline")
 @RequiredArgsConstructor
 public class HelplineTicketController {
 
-    // Service layer for helpline ticket business logic
-    private final HelplineTicketService helplineTicketService;
+	// Service layer for helpline ticket business logic
+	private final HelplineTicketService helplineTicketService;
 
-    // Repository to fetch logged-in user details
-    private final UserRepository userRepository;
+	// Repository to fetch logged-in user details
+	private final UserRepository userRepository;
 
-    // -------- Helper Method --------
-    /**
-     * Extracts roles from JWT Authentication object
-     * Example: ROLE_ADMIN → ADMIN
-     */
-    private List<String> getRolesFromAuth(Authentication auth) {
-        if (auth == null) {
-            return Collections.emptyList();
-        }
-        return auth.getAuthorities().stream()
-                .map(a -> a.getAuthority().replace("ROLE_", ""))
-                .collect(Collectors.toList());
-    }
+	// -------- Helper Method --------
+	/**
+	 * Extracts roles from JWT Authentication object Example: ROLE_ADMIN → ADMIN
+	 */
+	private List<String> getRolesFromAuth(Authentication auth) {
+		if (auth == null) {
+			return Collections.emptyList();
+		}
+		return auth.getAuthorities().stream().map(a -> a.getAuthority().replace("ROLE_", ""))
+				.collect(Collectors.toList());
+	}
 
-    // -------- RAISE HELPLINE TICKET --------
-    /**
-     * Allows an authenticated user to raise a helpline ticket
-     */
-    @PostMapping("/raise")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> raiseTicket(
-            @RequestBody RaiseHelplineTicketDTO dto,
-            Authentication auth
-    ) {
-        try {
-            String username = auth.getName();
+	// -------- RAISE HELPLINE TICKET --------
+	/**
+	 * Allows an authenticated user to raise a helpline ticket
+	 */
+	@PostMapping("/raise")
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<?> raiseTicket(@RequestBody RaiseHelplineTicketDTO dto, Authentication auth) {
+		try {
+			String username = auth.getName();
 
-            // Fetch logged-in user
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+			// Fetch logged-in user
+			User user = userRepository.findByUsername(username)
+					.orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Delegate ticket creation to service layer
-            HelplineTicket ticket = helplineTicketService.raiseTicket(
-                    user.getUid(),
-                    user.getEmail(),
-                    dto.getAssignedRoleName(),
-                    dto.getDescription(),
-                    dto.getPriority()
-            );
+			// Delegate ticket creation to service layer
+			HelplineTicket ticket = helplineTicketService.raiseTicket(user.getUid(), user.getEmail(),
+					dto.getAssignedRoleName(), dto.getDescription(), dto.getPriority());
 
-            // 200 OK with created ticket
-            return ResponseEntity.ok(ticket);
+			// 200 OK with created ticket
+			return ResponseEntity.ok(ticket);
 
-        } catch (RuntimeException ex) {
-            // Known business errors
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(ex.getMessage());
+		} catch (RuntimeException ex) {
+			// Known business errors
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
 
-        } catch (Exception ex) {
-            // Unexpected server errors
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to raise helpline ticket");
-        }
-    }
+		} catch (Exception ex) {
+			// Unexpected server errors
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to raise helpline ticket");
+		}
+	}
 
-    // -------- VIEW TICKETS RAISED BY ME --------
-    /**
-     * Fetches all tickets raised by the logged-in user
-     */
-    @GetMapping("/my/raised")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> myRaised(Authentication auth) {
-        try {
-            String username = auth.getName();
+	// -------- VIEW TICKETS RAISED BY ME --------
+	/**
+	 * Fetches all tickets raised by the logged-in user
+	 */
+	@GetMapping("/my/raised")
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<?> myRaised(Authentication auth) {
+		try {
+			String username = auth.getName();
 
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+			// Null check for authentication
+			if (username == null || username.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication required");
+			}
 
-            return ResponseEntity.ok(
-                    helplineTicketService.getTicketsRaisedByUser(user.getUid())
-            );
+			User user = userRepository.findByUsername(username)
+					.orElseThrow(() -> new RuntimeException("User not found"));
 
-        } catch (RuntimeException ex) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(ex.getMessage());
-        }
-    }
+			// Get tickets and ensure it's never null
+			List<HelplineTicket> tickets = helplineTicketService.getTicketsRaisedByUser(user.getUid());
 
-    // -------- VIEW PENDING TICKETS --------
-    /**
-     * Fetches pending tickets assigned to user's role
-     */
-    @GetMapping("/my/pending")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> myPending(Authentication auth) {
-        try {
-            List<String> roles = getRolesFromAuth(auth);
+			// Return empty list if null
+			if (tickets == null) {
+				tickets = Collections.emptyList();
+			}
 
-            return ResponseEntity.ok(
-                    helplineTicketService.getPendingTickets(roles)
-            );
+			return ResponseEntity.ok(tickets);
 
-        } catch (Exception ex) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Unable to fetch pending tickets");
-        }
-    }
+		} catch (RuntimeException ex) {
+			// Log the error for debugging
+			System.err.println("Error in myRaised: " + ex.getMessage());
+			ex.printStackTrace();
 
-    // -------- VIEW RESOLVED TICKETS --------
-    /**
-     * Fetches resolved tickets assigned to user's role
-     */
-    @GetMapping("/my/resolved")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> myResolved(Authentication auth) {
-        try {
-            List<String> roles = getRolesFromAuth(auth);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Collections.singletonMap("error", ex.getMessage()));
+		} catch (Exception ex) {
+			// Catch all other exceptions
+			System.err.println("Unexpected error in myRaised: " + ex.getMessage());
+			ex.printStackTrace();
 
-            return ResponseEntity.ok(
-                    helplineTicketService.getResolvedTickets(roles)
-            );
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Collections.singletonMap("error", "Failed to fetch tickets"));
+		}
+	}
 
-        } catch (Exception ex) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Unable to fetch resolved tickets");
-        }
-    }
+	// -------- VIEW PENDING TICKETS --------
+	/**
+	 * Fetches pending tickets assigned to user's role
+	 */
+	@GetMapping("/my/pending")
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<?> myPending(Authentication auth) {
+		try {
+			List<String> roles = getRolesFromAuth(auth);
 
-    // -------- RESOLVE HELPLINE TICKET --------
-    /**
-     * Resolves a helpline ticket if user is authorized
-     */
-    @PutMapping("/resolve/{ticketId}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> resolveTicket(
-            @PathVariable Long ticketId,
-            @RequestBody(required = false) ResolveHelplineTicketDTO dto,
-            Authentication auth
-    ) {
-        try {
-            String username = auth.getName();
+			return ResponseEntity.ok(helplineTicketService.getPendingTickets(roles));
 
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+		} catch (Exception ex) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unable to fetch pending tickets");
+		}
+	}
 
-            List<String> roles = getRolesFromAuth(auth);
+	// -------- VIEW RESOLVED TICKETS --------
+	/**
+	 * Fetches resolved tickets assigned to user's role
+	 */
+	@GetMapping("/my/resolved")
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<?> myResolved(Authentication auth) {
+		try {
+			List<String> roles = getRolesFromAuth(auth);
 
-            // Delegate resolution logic to service layer
-            HelplineTicket resolvedTicket =
-                    helplineTicketService.resolveTicket(
-                            ticketId,
-                            user.getUid(),
-                            roles
-                    );
+			return ResponseEntity.ok(helplineTicketService.getResolvedTickets(roles));
 
-            return ResponseEntity.ok(resolvedTicket);
+		} catch (Exception ex) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unable to fetch resolved tickets");
+		}
+	}
 
-        } catch (RuntimeException ex) {
-            // Authorization, validation, or business rule failures
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .body(ex.getMessage());
+	// -------- RESOLVE HELPLINE TICKET --------
+	/**
+	 * Resolves a helpline ticket if user is authorized
+	 */
+	@PutMapping("/resolve/{ticketId}")
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<?> resolveTicket(@PathVariable Long ticketId,
+			@RequestBody(required = false) ResolveHelplineTicketDTO dto, Authentication auth) {
+		try {
+			String username = auth.getName();
 
-        } catch (Exception ex) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to resolve ticket");
-        }
-    }
+			User user = userRepository.findByUsername(username)
+					.orElseThrow(() -> new RuntimeException("User not found"));
+
+			List<String> roles = getRolesFromAuth(auth);
+
+			// Delegate resolution logic to service layer
+			HelplineTicket resolvedTicket = helplineTicketService.resolveTicket(ticketId, user.getUid(), roles);
+
+			return ResponseEntity.ok(resolvedTicket);
+
+		} catch (RuntimeException ex) {
+			// Authorization, validation, or business rule failures
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+
+		} catch (Exception ex) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to resolve ticket");
+		}
+	}
 }

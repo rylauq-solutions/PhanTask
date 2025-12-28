@@ -318,6 +318,24 @@ export const apiService = {
   getMyNotices: () => api.get("/notices/my"),
   getNoticesByPriority: (priority) =>
     api.get(`/notices/my/priority/${priority}`),
+
+  /* ---------------------------------
+   *     HELPLINE TICKET SYSTEM
+   * --------------------------------- */
+  // Raise a new helpline ticket
+  raiseHelplineTicket: (ticketData) => api.post("/helpline/raise", ticketData),
+
+  // Get all tickets raised by the current user
+  getMyRaisedTickets: () => api.get("/helpline/my/raised"),
+
+  // Get pending tickets assigned to my role (for HR, MANAGER, SUPPORT, ADMIN)
+  getMyPendingTickets: () => api.get("/helpline/my/pending"),
+
+  // Get resolved tickets (for authorized roles only)
+  getMyResolvedTickets: () => api.get("/helpline/my/resolved"),
+
+  // Resolve a ticket (backend extracts resolvedByUserId from JWT)
+  resolveTicket: (ticketId) => api.put(`/helpline/resolve/${ticketId}`),
 };
 
 export default api;
