@@ -25,7 +25,7 @@ const SideBar = ({ children }) => {
     // ! Attendance/Timesheet
     isAdmin
       ? {
-        name: "Timesheet",
+        name: "Manage Attendance",
         icon: "fa-calendar-check",
         path: "/admin/manage-attendance",
       }

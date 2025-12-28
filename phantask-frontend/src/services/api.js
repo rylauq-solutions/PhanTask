@@ -267,6 +267,30 @@ export const apiService = {
   getNotices: () => api.get("/notices/active"),
 
   /* ---------------------------------
+   *      ATTENDANCE MANAGEMENT
+   * --------------------------------- */
+  // User: Register QR token for attendance
+  registerAttendanceToken: (token) =>
+    api.post("/attendance/token/register", { token }),
+
+  // Admin: Mark attendance by scanning QR
+  markAttendance: (token) => api.post("/attendance/mark", { token }),
+
+  // User: Get own attendance records
+  getMyAttendance: () => api.get("/attendance/my"),
+
+  // User: Get own attendance percentage
+  getMyAttendancePercentage: () => api.get("/attendance/percentage/my"),
+
+  // Admin/HR: Download attendance report (CSV)
+  downloadAttendanceReport: (startDate, endDate, userId = null) =>
+    api.post(
+      "/attendance/percentage/download",
+      { startDate, endDate, userId },
+      { responseType: "blob" } // Important for file download
+    ),
+
+  /* ---------------------------------
    *      TASK MANAGEMENT (ADMIN)
    * --------------------------------- */
   createTask: (taskData) => api.post("/tasks/admin/create", taskData),

@@ -7,12 +7,56 @@ const ThoughtsCard = () => {
     const [showModal, setShowModal] = useState(false);
     const [error, setError] = useState(false);
 
+    // Fallback quotes array in case API fails
+    const fallbackQuotes = [
+        {
+            text: "Any fool can write code that a computer can understand. Good programmers write code that humans can understand.",
+            author: "Martin Fowler"
+        },
+        {
+            text: "The best way to predict the future is to invent it.",
+            author: "Alan Kay"
+        },
+        {
+            text: "Code is like humor. When you have to explain it, it's bad.",
+            author: "Cory House"
+        },
+        {
+            text: "First, solve the problem. Then, write the code.",
+            author: "John Johnson"
+        },
+        {
+            text: "Experience is the name everyone gives to their mistakes.",
+            author: "Oscar Wilde"
+        },
+        {
+            text: "Innovation distinguishes between a leader and a follower.",
+            author: "Steve Jobs"
+        }
+    ];
+
+    // Get random fallback quote
+    const getRandomFallbackQuote = () => {
+        return fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
+    };
+
     // Fetch quote from Quotable API
     const fetchQuote = async () => {
         try {
             setLoading(true);
             setError(false);
-            const response = await fetch('https://api.quotable.io/random?tags=technology|wisdom|inspirational|success');
+
+            const response = await fetch(
+                'https://api.quotable.io/random?tags=technology|wisdom|inspirational|success',
+                {
+                    signal: AbortSignal.timeout(5000) // 5 second timeout
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('API response not OK');
+            }
+
             const data = await response.json();
 
             setQuote({
@@ -22,10 +66,8 @@ const ThoughtsCard = () => {
         } catch (err) {
             console.error('Failed to fetch quote:', err);
             setError(true);
-            setQuote({
-                text: "Any fool can write code that a computer can understand. Good programmers write code that humans can understand.",
-                author: "Martin Fowler"
-            });
+            // Use random fallback quote instead of always the same one
+            setQuote(getRandomFallbackQuote());
         } finally {
             setLoading(false);
         }
@@ -81,7 +123,7 @@ const ThoughtsCard = () => {
 
                     <button
                         onClick={getNewQuote}
-                        className="w-full text-center hover:rounded-xl text-[#42260b] text-sm font-medium mt-1 py-2 hover:bg-red-100"
+                        className="w-full text-center hover:rounded-xl text-[#42260b] text-sm font-medium mt-1 py-2 hover:bg-red-100 transition-colors"
                     >
                         Get New Quote
                     </button>
@@ -101,7 +143,9 @@ const ThoughtsCard = () => {
                             {/* Header Section */}
                             <div className="mb-3 text-center flex-shrink-0">
                                 <h3 className="text-2xl font-bold text-amber-950">Daily Inspiration</h3>
-                                <p className="text-sm text-gray-700 mt-1">A quote to inspire your journey</p>
+                                <p className="text-sm text-gray-700 mt-1">
+                                    {error ? 'A quote from our collection' : 'A quote to inspire your journey'}
+                                </p>
                             </div>
 
                             {/* Body Section - Quote Content */}
