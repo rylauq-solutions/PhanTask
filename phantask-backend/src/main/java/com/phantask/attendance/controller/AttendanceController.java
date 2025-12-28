@@ -60,6 +60,12 @@ public class AttendanceController {
         return ResponseEntity.ok(attendanceService.getMyAttendance());
     }
     
+    @GetMapping("/percentage/my")
+    @PreAuthorize("isAuthenticated()")
+    public AttendancePercentageResponse getMyAttendancePercentage() {
+        return attendanceService.getMyAttendancePercentage();
+    }
+    
     @PostMapping("/percentage/download")
     @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
     public ResponseEntity<byte[]> downloadAttendancePercentage(
