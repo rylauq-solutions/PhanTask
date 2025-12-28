@@ -21,6 +21,7 @@ import ManageUsers from "./pages/ManageUsers";
 import Notices from "./pages/Notices.jsx";
 import ManageNotices from "./pages/ManageNotices.jsx";
 import ManageFeedbacks from "./pages/ManageFeedbacks.jsx";
+import ManageAttendance from "./pages/ManageAttendance.jsx";
 
 const AppContent = () => {
   const location = useLocation();

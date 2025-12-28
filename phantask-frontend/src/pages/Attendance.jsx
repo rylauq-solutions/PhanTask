@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import QRCode from "react-qr-code";
 
 const Attendance = () => {
@@ -53,4 +53,3 @@ const Attendance = () => {
 };
 
 export default Attendance;
-

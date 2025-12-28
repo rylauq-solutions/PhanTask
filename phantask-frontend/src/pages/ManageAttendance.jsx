@@ -64,7 +64,7 @@ export default function ManageAttendance() {
           }
         }
       },
-      () => {}
+      () => { }
     );
 
     return () => scanner.clear();
@@ -142,8 +142,8 @@ export default function ManageAttendance() {
                 state === "COMPLETED"
                   ? "green"
                   : state === "CHECKED_IN"
-                  ? "orange"
-                  : "red",
+                    ? "orange"
+                    : "red",
             }}
           >
             {message}
