@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.phantask.attendance.dto.AttendancePercentageResponse;
+import com.phantask.attendance.dto.AttendanceReportRequest;
 import com.phantask.attendance.dto.AttendanceResponse;
 import com.phantask.attendance.dto.MarkAttendanceRequest;
 import com.phantask.attendance.entity.Attendance;
@@ -24,6 +26,9 @@ public class AttendanceController {
 
     private final IAttendanceService attendanceService;
 
+    /**
+     * User navigates to Attendance for generating a QR-code
+     */
     @PostMapping("/token/register")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> registerToken(
@@ -54,4 +59,46 @@ public class AttendanceController {
     public ResponseEntity<List<Attendance>> myAttendance() {
         return ResponseEntity.ok(attendanceService.getMyAttendance());
     }
+    
+    @PostMapping("/percentage/download")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
+    public ResponseEntity<byte[]> downloadAttendancePercentage(
+            @RequestBody AttendanceReportRequest request
+    ) {
+
+        List<AttendancePercentageResponse> data =
+                attendanceService.getAttendancePercentage(
+                        request.getStartDate(),
+                        request.getEndDate(),
+                        request.getUserId()
+                );
+
+        String csv = buildCsv(data);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition",
+                        "attachment; filename=attendance_percentage.csv")
+                .header("Content-Type", "text/csv")
+                .body(csv.getBytes());
+    }
+    
+    private String buildCsv(List<AttendancePercentageResponse> data) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("User ID,Username,Total Days,Present Days,Absent Days,Leave Days,Attendance Percentage\n");
+
+        for (AttendancePercentageResponse r : data) {
+            sb.append(r.getUserId()).append(",")
+              .append(r.getUsername()).append(",")
+              .append(r.getTotalDays()).append(",")
+              .append(r.getPresentDays()).append(",")
+              .append(r.getAbsentDays()).append(",")
+              .append(r.getLeaveDays()).append(",")
+              .append(r.getAttendancePercentage())
+              .append("\n");
+        }
+
+        return sb.toString();
+    }
+
 }

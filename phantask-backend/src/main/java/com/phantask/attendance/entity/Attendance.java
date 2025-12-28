@@ -3,10 +3,13 @@ package com.phantask.attendance.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.phantask.attendance.enums.AttendanceStatus;
 import com.phantask.authentication.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -48,8 +51,9 @@ public class Attendance {
     /**
      * CHECKED_IN / CHECKED_OUT / ABSENT / LEAVE / WFH
      */
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private AttendanceStatus status;
     
     @ManyToOne
     @JoinColumn(name = "marked_by")

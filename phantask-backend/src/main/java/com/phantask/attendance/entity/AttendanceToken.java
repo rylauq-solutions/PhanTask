@@ -10,12 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(
-    name = "attendance_tokens",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"uid", "date"})
-    }
-)
+@Table(name = "attendance_tokens")
 @Getter
 @Setter
 public class AttendanceToken {

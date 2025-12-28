@@ -118,7 +118,7 @@ public class UserService implements IUserService {
         log.info("Account created: username={}, role={}", username, normalizedRole);
 
         try {
-            emailService.sendAccountCreationEmail("bkpati2024@gmail.com", username, tempPassword);
+            emailService.sendAccountCreationEmail("phantask@zohomail.in", username, tempPassword);
         } catch (Exception e) {
             log.error("Email sending failed", e);
         }
