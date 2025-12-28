@@ -1,7 +1,10 @@
 package com.phantask.attendance.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +20,8 @@ import com.phantask.attendance.dto.MarkAttendanceRequest;
 import com.phantask.attendance.entity.Attendance;
 import com.phantask.attendance.service.IAttendanceService;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -39,16 +44,44 @@ public class AttendanceController {
     }
     
     /**
-     * Admin scans user's QR token
+     * Admin/HR/Manager scans user's QR token to mark attendance
+     * 
+     * CHANGED: hasRole() → hasAuthority()
+     * Reason: JWT tokens use "ADMIN" not "ROLE_ADMIN"
      */
     @PostMapping("/mark")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AttendanceResponse> markAttendance(
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HR') or hasAuthority('MANAGER')")
+    public ResponseEntity<?> markAttendance(
             @RequestBody MarkAttendanceRequest request) {
 
-    	Attendance attendance = attendanceService.markAttendance(request.getToken());
+        try {
+            if (request.getToken() == null || request.getToken().isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "QR token is required"));
+            }
 
-        return ResponseEntity.ok(new AttendanceResponse(attendance));
+            Attendance attendance = attendanceService.markAttendance(request.getToken());
+
+            return ResponseEntity.ok(Map.of(
+                "message", "Attendance marked successfully",
+                "username", attendance.getUser().getUsername(),
+                "timestamp", LocalDateTime.now(),
+                "attendance", new AttendanceResponse(attendance)
+            ));
+            
+        } catch (ExpiredJwtException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "QR code expired. User needs to refresh."));
+        } catch (JwtException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Invalid QR token: " + e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to mark attendance: " + e.getMessage()));
+        }
     }
 
     /**
@@ -66,8 +99,13 @@ public class AttendanceController {
         return attendanceService.getMyAttendancePercentage();
     }
     
+    /**
+     * Admin/HR downloads attendance report
+     * 
+     * CHANGED: hasRole() → hasAuthority()
+     */
     @PostMapping("/percentage/download")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HR')")
     public ResponseEntity<byte[]> downloadAttendancePercentage(
             @RequestBody AttendanceReportRequest request
     ) {
@@ -106,5 +144,4 @@ public class AttendanceController {
 
         return sb.toString();
     }
-
 }

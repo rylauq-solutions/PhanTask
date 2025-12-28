@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from '../../context/AuthContext.jsx';
+import { apiService } from '../../services/api.js';
 import PhanAI from "../../components/PhanAI.jsx";
 import UserDashboard from "./UserDashboard";
 import AdminDashboard from "./AdminDashboard";
@@ -8,10 +9,12 @@ const Dashboard = () => {
   const { user, isAdmin } = useAuth();
   const [greeting, setGreeting] = useState("");
   const [currentDate, setCurrentDate] = useState("");
+  const [attendancePercentage, setAttendancePercentage] = useState(0);
+  const [loading, setLoading] = useState(true);
+
   const userNameDisplay = user?.fullName
     ? user?.fullName.split(" ")[0]
     : ((user?.username)?.charAt(0).toUpperCase() + (user?.username).slice(1));
-  const attendancePercentage = 80; // Example value for dynamic border color
 
   useEffect(() => {
     const now = new Date();
@@ -30,6 +33,23 @@ const Dashboard = () => {
     setCurrentDate(now.toLocaleDateString("en-US", options));
   }, []);
 
+  useEffect(() => {
+    const fetchAttendance = async () => {
+      try {
+        setLoading(true);
+        const response = await apiService.getMyAttendance();
+        setAttendancePercentage(response.attendancePercentage || 0);
+      } catch (error) {
+        console.error('Failed to fetch attendance:', error);
+        setAttendancePercentage(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAttendance();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-3 md:p-4">
       <div className="max-w-7xl mx-auto">
@@ -43,9 +63,9 @@ const Dashboard = () => {
 
         {/* Conditional Dashboard Rendering */}
         {isAdmin ? (
-          <AdminDashboard attendancePercentage={attendancePercentage} />
+          <AdminDashboard attendancePercentage={attendancePercentage} loading={loading} />
         ) : (
-          <UserDashboard attendancePercentage={attendancePercentage} />
+          <UserDashboard attendancePercentage={attendancePercentage} loading={loading} />
         )}
 
         <PhanAI />

@@ -28,7 +28,8 @@ const getTokenExpiry = (token) => {
   }
 };
 
-// Check if token is expired or expiring soon (within 1 minute)
+// Check if token is expired or expiring soon
+// UPDATED: For 15-minute tokens, refresh when 2 minutes remain
 const shouldRefreshToken = (token) => {
   if (!token) return false;
 
@@ -37,8 +38,9 @@ const shouldRefreshToken = (token) => {
 
   const timeUntilExpiry = expiry - Date.now();
 
-  // Already expired or expiring within 60 seconds
-  return timeUntilExpiry < 60000;
+  // Refresh when 2 minutes or less remaining (instead of 1 minute)
+  // For 15-min tokens: refresh at 13 minutes
+  return timeUntilExpiry < 120000; // 2 minutes in milliseconds
 };
 
 // REFRESH TOKEN LOGIC WITH PROPER PROMISE HANDLING
@@ -282,13 +284,11 @@ export const apiService = {
   // User: Get own attendance percentage
   getMyAttendancePercentage: () => api.get("/attendance/percentage/my"),
 
-  // Admin/HR: Download attendance report (CSV)
-  downloadAttendanceReport: (startDate, endDate, userId = null) =>
-    api.post(
-      "/attendance/percentage/download",
-      { startDate, endDate, userId },
-      { responseType: "blob" } // Important for file download
-    ),
+  // Admin/HR: Download attendance timesheet (CSV)
+  downloadAttendanceTimesheet: (params) =>
+    api.post("/attendance/percentage/download", params, {
+      responseType: "blob",
+    }),
 
   /* ---------------------------------
    *      TASK MANAGEMENT (ADMIN)
