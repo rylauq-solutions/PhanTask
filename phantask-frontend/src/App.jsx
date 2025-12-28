@@ -95,7 +95,7 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <SideBar>
-                <Attendance />
+                <ManageAttendance />
               </SideBar>
             </PrivateRoute>
           }
