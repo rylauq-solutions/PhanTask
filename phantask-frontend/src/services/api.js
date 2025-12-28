@@ -222,7 +222,7 @@ export const apiService = {
   refreshAccessToken,
 
   /* ---------------------------------
-   *      CHANGE PASSWORD ON FIRST LOGIN
+   *      CHANGE PASSWORD ON FIRST LOGIN (NO AUTH REQUIRED)
    * --------------------------------- */
   changePasswordFirstLogin: async (oldPassword, newPassword, username) => {
     const publicApi = axios.create({
@@ -262,7 +262,6 @@ export const apiService = {
   /* ---------------------------------
    *      DASHBOARD DATA
    * --------------------------------- */
-  // getMyPendingTasks: () => api.get("/tasks/my/pending"), // Already defined below
   getAttendance: () => api.get("/attendance/current"),
   getSchedule: () => api.get("/schedule/today"),
   getNotices: () => api.get("/notices/active"),
@@ -284,6 +283,59 @@ export const apiService = {
   getMySubmittedTasks: () => api.get("/tasks/my/submitted"),
   submitTask: (taskId, driveUrl) =>
     api.put(`/tasks/my/submit/${taskId}`, { driveUrl }),
+
+  /* ---------------------------------
+   *     FEEDBACK (ADMIN)
+   * --------------------------------- */
+  createFeedback: (feedbackData) =>
+    api.post("/feedback/admin/create", feedbackData),
+  getAllFeedbackTemplates: () => api.get("/feedback/admin/all"),
+  updateFeedbackTemplate: (id, feedbackData) =>
+    api.put(`/feedback/admin/update/${id}`, feedbackData),
+  deleteFeedbackTemplate: (id) => api.delete(`/feedback/admin/delete/${id}`),
+  getFeedbackReport: (id) => api.get(`/feedback/admin/report/${id}`),
+
+  /* ---------------------------------
+   *     FEEDBACK (USER)
+   * --------------------------------- */
+  getAvailableFeedbackForUser: () => api.get("/feedback/user/available"),
+  submitFeedback: (id, ratings) =>
+    api.post(`/feedback/user/${id}/submit`, { ratings }),
+  getSubmittedFeedbackCount: () => api.get("/feedback/user/count"),
+
+  /* ---------------------------------
+   *     NOTICE MANAGEMENT (ADMIN)
+   * --------------------------------- */
+  createNotice: (noticeData) => api.post("/notices/admin/create", noticeData),
+  updateNotice: (noticeId, noticeData) =>
+    api.put(`/notices/admin/update/${noticeId}`, noticeData),
+  deleteNotice: (noticeId) => api.delete(`/notices/admin/delete/${noticeId}`),
+  getAllNoticesAdmin: () => api.get("/notices/admin/all"),
+
+  /* ---------------------------------
+   *     NOTICE MANAGEMENT (USER)
+   * --------------------------------- */
+  getMyNotices: () => api.get("/notices/my"),
+  getNoticesByPriority: (priority) =>
+    api.get(`/notices/my/priority/${priority}`),
+
+  /* ---------------------------------
+   *     HELPLINE TICKET SYSTEM
+   * --------------------------------- */
+  // Raise a new helpline ticket
+  raiseHelplineTicket: (ticketData) => api.post("/helpline/raise", ticketData),
+
+  // Get all tickets raised by the current user
+  getMyRaisedTickets: () => api.get("/helpline/my/raised"),
+
+  // Get pending tickets assigned to my role (for HR, MANAGER, SUPPORT, ADMIN)
+  getMyPendingTickets: () => api.get("/helpline/my/pending"),
+
+  // Get resolved tickets (for authorized roles only)
+  getMyResolvedTickets: () => api.get("/helpline/my/resolved"),
+
+  // Resolve a ticket (backend extracts resolvedByUserId from JWT)
+  resolveTicket: (ticketId) => api.put(`/helpline/resolve/${ticketId}`),
 };
 
 export default api;

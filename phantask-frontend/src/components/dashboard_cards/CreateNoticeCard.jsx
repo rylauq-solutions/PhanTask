@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import Select from "react-select";
 import { getRoleOptionsWithoutAdmin, DEFAULT_ROLE_OPTIONS } from "../../constants/roles";
-
+import { apiService } from "../../services/api";
 
 // ! Main Component - Create Notice Card
 const CreateNoticeCard = () => {
     const [showModal, setShowModal] = useState(false);
-
 
     return (
         <>
@@ -19,24 +18,20 @@ const CreateNoticeCard = () => {
                         Create Notice
                     </h2>
 
-
                     {/* * Empty-state content */}
                     <main className="w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-[#fff9f8]/30 to-[#fff1f0]/20 rounded-xl border-[#522320]/20 shadow-sm">
                         <div className="w-14 h-14 bg-[#522320]/5 rounded-2xl flex items-center justify-center mb-3 shadow-md shadow-[#522320]/10">
                             <span className="text-2xl">📢</span>
                         </div>
 
-
                         <h3 className="text-xl text-center font-bold text-[#522320] mb-1.5 leading-tight">
                             Post New Notice
                         </h3>
-
 
                         <p className="text-[#522320]/60 text-xs font-medium text-center leading-tight max-w-[160px]">
                             Create announcements visible to selected roles.
                         </p>
                     </main>
-
 
                     {/* * Action Button */}
                     <button
@@ -48,16 +43,13 @@ const CreateNoticeCard = () => {
                 </span>
             </div>
 
-
             {/* ? Conditionally render modal */}
             {showModal && <CreateNoticeModal onClose={() => setShowModal(false)} />}
         </>
     );
 };
 
-
 export default CreateNoticeCard;
-
 
 // ! Modal Component - Create Notice Form
 const CreateNoticeModal = ({ onClose }) => {
@@ -71,10 +63,8 @@ const CreateNoticeModal = ({ onClose }) => {
     const [confirmVisible, setConfirmVisible] = useState(false);
     const [confirmed, setConfirmed] = useState(false);
 
-
     // * Role Options for Multi-Select Dropdown with Checkboxes (without ADMIN)
     const roleOptions = getRoleOptionsWithoutAdmin(DEFAULT_ROLE_OPTIONS);
-
 
     // * Priority Options
     const priorityOptions = [
@@ -83,8 +73,7 @@ const CreateNoticeModal = ({ onClose }) => {
         { value: "URGENT", label: "Urgent" },
     ];
 
-
-    // * Custom Styles for React-Select Multi-Select with Checkboxes
+    // * Custom Styles for React-Select (matching Task component)
     const selectStyles = {
         control: (base, state) => ({
             ...base,
@@ -119,16 +108,17 @@ const CreateNoticeModal = ({ onClose }) => {
             ...base,
             fontSize: "0.875rem",
             backgroundColor: state.isSelected
-                ? "#fef3c7"
+                ? "#facc15"
                 : state.isFocused
                     ? "#fef3c7"
                     : "white",
-            color: "#111827",
+            color: state.isSelected ? "#422006" : "#111827",
             cursor: "pointer",
             padding: "0.5rem 0.75rem",
             display: "flex",
             alignItems: "center",
             gap: "0.5rem",
+            borderRadius: "0.375rem",
         }),
         placeholder: (base) => ({
             ...base,
@@ -191,14 +181,12 @@ const CreateNoticeModal = ({ onClose }) => {
         }),
     };
 
-
     // * Custom Option Component with Checkbox (for multi-select)
     const CheckboxOption = (props) => {
         // Skip rendering checkbox for placeholder/empty options
         if (!props.data.value || props.data.value === "") {
             return null;
         }
-
 
         return (
             <div
@@ -217,6 +205,13 @@ const CreateNoticeModal = ({ onClose }) => {
         );
     };
 
+    // * Handle Posted By input - CAPS only with underscores
+    const handlePostedByChange = (e) => {
+        const value = e.target.value;
+        // Replace spaces with underscores and convert to uppercase
+        const formatted = value.replace(/\s+/g, '_').toUpperCase().replace(/[^A-Z_]/g, '');
+        setPostedBy(formatted);
+    };
 
     // * Handle Notice Creation
     const handleCreateNotice = async () => {
@@ -227,10 +222,8 @@ const CreateNoticeModal = ({ onClose }) => {
         if (targetRoles.length === 0) return toast.error("At least one role must be selected");
         if (!confirmed) return toast.error("Please confirm before proceeding");
 
-
         try {
             setLoading(true);
-
 
             // Prepare data payload
             const noticeData = {
@@ -239,32 +232,30 @@ const CreateNoticeModal = ({ onClose }) => {
                 postedBy: postedBy.trim(),
                 priority: priority,
                 targetRoles: targetRoles.map(role => role.value),
-                // createdAt will be handled by backend
             };
 
-
-            console.log("Notice Data:", noticeData);
-
-
-            // TODO: Replace with actual API call when backend is ready
-            // const res = await apiService.createNotice(noticeData);
-
+            // API call to create notice
+            await apiService.createNotice(noticeData);
 
             toast.success("Notice created successfully!", { duration: 3000 });
             onClose();
+
+            // Refresh notices if callback provided
+            if (window.refreshNotices) {
+                window.refreshNotices();
+            }
         } catch (err) {
-            toast.error(err?.response?.data?.error || "Failed to create notice");
+            toast.error(err?.response?.data?.message || err?.response?.data?.error || "Failed to create notice");
+            console.error("Error creating notice:", err);
         } finally {
             setLoading(false);
         }
     };
 
-
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             {/* * Background Overlay */}
             <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-
 
             {/* * Modal Container - Responsive width with scroll */}
             <div className="relative w-[90%] sm:w-[80%] md:w-2/5 max-h-[95vh] animate-slideUp">
@@ -274,7 +265,6 @@ const CreateNoticeModal = ({ onClose }) => {
                         <h3 className="text-2xl font-bold text-amber-950">Create Notice</h3>
                         <p className="text-sm text-gray-700 mt-1">Post an announcement for selected roles</p>
                     </div>
-
 
                     {/* * Body Section - Form Inputs */}
                     <div className="flex-1 flex flex-col gap-3">
@@ -290,7 +280,6 @@ const CreateNoticeModal = ({ onClose }) => {
                 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
                         />
 
-
                         {/* Content Textarea */}
                         <label className="text-sm font-semibold text-gray-800 mt-1">Content</label>
                         <textarea
@@ -303,19 +292,18 @@ const CreateNoticeModal = ({ onClose }) => {
                 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600 resize-none"
                         />
 
-
-                        {/* Posted By Input */}
+                        {/* Posted By Input - CAPS only with underscores */}
                         <label className="text-sm font-semibold text-gray-800 mt-1">Posted By</label>
                         <input
                             type="text"
                             value={postedBy}
-                            onChange={(e) => setPostedBy(e.target.value)}
-                            placeholder="Ex: HR Department, Admin, IT Team"
+                            onChange={handlePostedByChange}
+                            placeholder="Ex: HR_DEPARTMENT, ADMIN, IT_TEAM"
                             maxLength={100}
                             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-                focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
+                focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600 uppercase"
                         />
-
+                        <p className="text-xs text-gray-500 -mt-2">Only uppercase letters and underscores allowed</p>
 
                         {/* Priority Select */}
                         <label className="text-sm font-semibold text-gray-800 mt-1">Priority</label>
@@ -328,7 +316,6 @@ const CreateNoticeModal = ({ onClose }) => {
                             menuPortalTarget={document.body}
                             menuPosition="fixed"
                         />
-
 
                         {/* Target Roles Multi-Select with Checkboxes */}
                         <label className="text-sm font-semibold text-gray-800 mt-1">Target Roles</label>
@@ -347,7 +334,6 @@ const CreateNoticeModal = ({ onClose }) => {
                         />
                     </div>
 
-
                     {/* * Footer Section - Action Buttons */}
                     <div className="mt-4 flex-shrink-0">
                         {/* ? Initial State - Create or Cancel */}
@@ -359,7 +345,6 @@ const CreateNoticeModal = ({ onClose }) => {
                                 >
                                     Create Notice
                                 </button>
-
 
                                 <button
                                     onClick={onClose}
@@ -382,7 +367,6 @@ const CreateNoticeModal = ({ onClose }) => {
                                     I confirm all details are correct.
                                 </label>
 
-
                                 {/* Final Action Buttons */}
                                 <div className="flex gap-2">
                                     <button
@@ -397,7 +381,6 @@ const CreateNoticeModal = ({ onClose }) => {
                                     >
                                         {loading ? "Creating..." : "Confirm & Create"}
                                     </button>
-
 
                                     <button
                                         onClick={() => {
@@ -415,7 +398,6 @@ const CreateNoticeModal = ({ onClose }) => {
                 </div>
             </div>
 
-
             {/* * Custom Styles - Animations and Scrollbar */}
             <style>
                 {`
@@ -426,24 +408,20 @@ const CreateNoticeModal = ({ onClose }) => {
                     }
                     .animate-slideUp { animation: slideUp 0.2s ease-out forwards; }
 
-
                     /* Custom scrollbar styling for modal */
                     .overflow-y-auto::-webkit-scrollbar {
                         width: 8px;
                     }
-
 
                     .overflow-y-auto::-webkit-scrollbar-track {
                         background: transparent;
                         margin: 0.4rem 0;
                     }
 
-
                     .overflow-y-auto::-webkit-scrollbar-thumb {
                         background: #d1d5db;
                         border-radius: 8px;
                     }
-
 
                     .overflow-y-auto::-webkit-scrollbar-thumb:hover {
                         background: #9ca3af;

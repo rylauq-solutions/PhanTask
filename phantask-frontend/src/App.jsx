@@ -3,7 +3,6 @@ import SideBar from "./components/SideBar";
 import { Routes, Route, BrowserRouter, useLocation } from "react-router-dom";
 import Dashboard from "./pages/dashboard/Dashboard.jsx";
 import Attendance from "./pages/Attendance";
-import SocialHub from "./pages/SocialHub";
 import Helpline from "./pages/Helpline";
 import Feedback from "./pages/Feedback";
 import Settings from "./pages/Settings";
@@ -21,6 +20,7 @@ import ManageTasks from "./pages/ManageTasks";
 import ManageUsers from "./pages/ManageUsers";
 import Notices from "./pages/Notices.jsx";
 import ManageNotices from "./pages/ManageNotices.jsx";
+import ManageFeedbacks from "./pages/ManageFeedbacks.jsx";
 
 const AppContent = () => {
   const location = useLocation();
@@ -125,7 +125,7 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <SideBar>
-                <SocialHub />
+                {/* <SocialHub /> */}
               </SideBar>
             </PrivateRoute>
           }
@@ -156,6 +156,16 @@ const AppContent = () => {
             <PrivateRoute>
               <SideBar>
                 <Feedback />
+              </SideBar>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/manage-feedbacks"
+          element={
+            <PrivateRoute>
+              <SideBar>
+                <ManageFeedbacks />
               </SideBar>
             </PrivateRoute>
           }

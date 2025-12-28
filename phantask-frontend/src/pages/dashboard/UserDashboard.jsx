@@ -1,7 +1,5 @@
 import React from "react";
 import AttendanceCard from "../../components/dashboard_cards/AttendanceCard";
-import SocialHighlightsCard from "../../components/dashboard_cards/SocialHighlightsCard";
-import FocusReminderCard from "../../components/dashboard_cards/FocusReminderCard";
 import NoticeBoardCard from "../../components/dashboard_cards/NoticeBoardCard";
 import FeedbackSummaryCard from "../../components/dashboard_cards/FeedbackSummaryCard";
 import AssignedTasksCard from "../../components/dashboard_cards/AssignedTasksCard";
@@ -23,12 +21,6 @@ const UserDashboard = ({ attendancePercentage }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                 <div className="h-60"><FeedbackSummaryCard /></div>
                 <div className="h-60"><NoticeBoardCard /></div>
-            </div>
-
-            {/* Bottom Section - 2 Columns */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                <div className="h-72"><SocialHighlightsCard /></div>
-                <div className="h-72"><FocusReminderCard /></div>
             </div>
         </>
     );

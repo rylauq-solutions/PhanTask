@@ -1,65 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { FaFilter } from "react-icons/fa";
+import { FaFilter, FaTrash } from "react-icons/fa";
+import { toast } from "react-hot-toast";
 import LoadingSkeleton from "../components/LoadingSkeleton";
+import { apiService } from "../services/api";
 
 const Notices = () => {
-    const { loading } = useAuth();
-
-    // Set mock data directly in useState
-    const [notices] = useState([
-        {
-            id: 1,
-            title: "Holiday Announcement - Diwali 2025",
-            content: "The office will remain closed from Oct 24-26 for Diwali celebrations. Regular operations resume on Oct 27. Wishing everyone a happy and prosperous Diwali!",
-            priority: "IMPORTANT",
-            createdBy: "HR Department",
-            createdAt: "2025-10-15T10:30:00Z"
-        },
-        {
-            id: 2,
-            title: "Urgent: Server Maintenance",
-            content: "Emergency server maintenance scheduled for tonight at 11 PM. All services will be unavailable for approximately 2 hours. Please save your work before 10:30 PM.",
-            priority: "URGENT",
-            createdBy: "IT Department",
-            createdAt: "2025-12-18T09:00:00Z"
-        },
-        {
-            id: 3,
-            title: "Team Building Event",
-            content: "Join us for a team building event next Friday at 4 PM in the main conference hall. Snacks and refreshments will be provided. RSVP by Wednesday.",
-            priority: "GENERAL",
-            createdBy: "Admin",
-            createdAt: "2025-12-10T14:20:00Z"
-        },
-        {
-            id: 4,
-            title: "New Parking Policy",
-            content: "Effective from January 1st, 2026, new parking guidelines will be implemented. All employees must register their vehicles at the security desk. Visitor parking will be available in Lot B only.",
-            priority: "IMPORTANT",
-            createdBy: "Administration",
-            createdAt: "2025-12-05T11:45:00Z"
-        },
-        {
-            id: 5,
-            title: "Fire Drill Schedule",
-            content: "Monthly fire drill will be conducted on December 20th at 3 PM. Please follow evacuation procedures and assemble at designated meeting points.",
-            priority: "GENERAL",
-            createdBy: "Safety Officer",
-            createdAt: "2025-12-01T08:15:00Z"
-        },
-        {
-            id: 6,
-            title: "Critical: Security Update Required",
-            content: "All employees must update their system passwords immediately. New security protocols require passwords to be changed every 90 days. Contact IT support if you face any issues.",
-            priority: "URGENT",
-            createdBy: "Security Team",
-            createdAt: "2025-12-17T16:00:00Z"
-        }
-    ]);
-
-    // Filter state: ALL, URGENT, IMPORTANT, GENERAL
+    const { user } = useAuth();
+    const [notices, setNotices] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("ALL");
+    const [selectedNotice, setSelectedNotice] = useState(null);
+
+    const isAdmin = user?.role === "ADMIN";
+
+    // Fetch notices based on user role
+    const fetchNotices = async () => {
+        try {
+            setLoading(true);
+            let data;
+
+            if (isAdmin) {
+                data = await apiService.getAllNoticesAdmin();
+            } else {
+                data = await apiService.getMyNotices();
+            }
+
+            setNotices(data?.data || []);
+        } catch (error) {
+            toast.error("Failed to fetch notices");
+            console.error("Error fetching notices:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchNotices();
+
+        // Expose refresh function globally for CreateNoticeCard
+        window.refreshNotices = fetchNotices;
+
+        return () => {
+            delete window.refreshNotices;
+        };
+    }, [user]);
 
     // Show loading skeleton
     if (loading) {
@@ -108,7 +93,7 @@ const Notices = () => {
         return `${formatDate(dateStr)} at ${time}`;
     };
 
-    // Get priority color - pink-600 for GENERAL
+    // Get priority color
     const getPriorityColor = (priority) => {
         switch (priority) {
             case "URGENT":
@@ -134,15 +119,29 @@ const Notices = () => {
         }
     };
 
-    // Modal state
-    const [selectedNotice, setSelectedNotice] = useState(null);
-
     const openModal = (notice) => {
         setSelectedNotice(notice);
     };
 
     const closeModal = () => {
         setSelectedNotice(null);
+    };
+
+    // Delete notice (Admin only)
+    const handleDeleteNotice = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this notice?")) {
+            return;
+        }
+
+        try {
+            await apiService.deleteNotice(id);
+            toast.success("Notice deleted successfully");
+            fetchNotices();
+            closeModal();
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Failed to delete notice");
+            console.error("Error deleting notice:", error);
+        }
     };
 
     // Notice Card Component
@@ -153,7 +152,7 @@ const Notices = () => {
         >
             <div>
                 <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-lg flex-1">{notice.title}</h3>
+                    <h3 className="font-semibold text-lg flex-1 line-clamp-2">{notice.title}</h3>
                     <span
                         className={`text-xs font-semibold px-2 py-1 rounded-full ${getPriorityBadge(
                             notice.priority
@@ -210,12 +209,18 @@ const Notices = () => {
 
                         <div className="mb-4">
                             <p className="text-sm text-gray-600">
-                                <span className="font-semibold">Posted by:</span> {selectedNotice.createdBy}
+                                <span className="font-semibold">Posted by:</span> {selectedNotice.postedBy}
                             </p>
                             <p className="text-sm text-gray-600">
                                 <span className="font-semibold">Date:</span>{" "}
                                 {formatDateTime(selectedNotice.createdAt)}
                             </p>
+                            {isAdmin && selectedNotice.targetRoles && (
+                                <p className="text-sm text-gray-600">
+                                    <span className="font-semibold">Target Roles:</span>{" "}
+                                    {selectedNotice.targetRoles.join(", ")}
+                                </p>
+                            )}
                         </div>
 
                         <div className="flex-1 overflow-auto mb-4">
@@ -226,6 +231,14 @@ const Notices = () => {
                         </div>
 
                         <div className="flex gap-2">
+                            {isAdmin && (
+                                <button
+                                    onClick={() => handleDeleteNotice(selectedNotice.id)}
+                                    className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold hover:scale-95 transition-transform duration-300"
+                                >
+                                    <FaTrash /> Delete
+                                </button>
+                            )}
                             <button
                                 onClick={closeModal}
                                 className="hover:scale-95 transition-transform duration-300 flex-1 py-2 rounded-lg bg-stone-200 hover:bg-stone-300 text-gray-800 font-semibold"
@@ -303,6 +316,13 @@ const Notices = () => {
             {/* Filter Bar */}
             <FilterBar />
 
+            {/* Admin Create Notice Card */}
+            {isAdmin && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                    <CreateNoticeCard />
+                </div>
+            )}
+
             {/* Empty State */}
             {sortedNotices.length === 0 && (
                 <main className="w-full h-[60vh] flex flex-col items-center justify-center p-4">
@@ -313,7 +333,10 @@ const Notices = () => {
                         No Notices Available
                     </h3>
                     <p className="text-[#522320]/60 text-sm text-center max-w-md">
-                        There are no notices to display at the moment. Check back later for updates and announcements.
+                        {filter === "ALL"
+                            ? "There are no notices to display at the moment. Check back later for updates and announcements."
+                            : `No ${filter.toLowerCase()} notices found. Try changing the filter.`
+                        }
                     </p>
                 </main>
             )}
