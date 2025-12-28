@@ -129,6 +129,36 @@ public class AttendanceServiceImpl implements IAttendanceService {
         return attendanceRepo.findByUser(user);
     }
     
+    
+    @Override
+    @Transactional(readOnly = true)
+    public AttendancePercentageResponse getMyAttendancePercentage() {
+
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        LocalDate startDate = user.getCreatedAt().toLocalDate(); // or joining date
+        LocalDate endDate = LocalDate.now();
+
+        List<Attendance> records = attendanceRepo
+                .findByUserUidAndAttendanceDateBetween(user.getUid(), startDate, endDate);
+
+        if (records.isEmpty()) {
+            return new AttendancePercentageResponse(
+                    user.getUid(),
+                    user.getUsername(),
+                    0, 0, 0, 0, 0
+            );
+        }
+
+        return calculatePercentage(records);
+    }
+
+    
     /**
      * System marked for No-Shows
      */

@@ -11,6 +11,7 @@ public interface IAttendanceService {
 	void registerQrToken(String token);
 	Attendance markAttendance(String token);
 	List<Attendance> getMyAttendance();
+	AttendancePercentageResponse getMyAttendancePercentage();
 	List<AttendancePercentageResponse> getAttendancePercentage(
 	            LocalDate startDate,
 	            LocalDate endDate,
