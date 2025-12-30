@@ -2,7 +2,6 @@ package com.phantask.authentication.security;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -41,10 +40,10 @@ import lombok.RequiredArgsConstructor;
  * </p>
  *
  * <p>
- * Note: This filter creates two versions of each authority:
- * - Plain version (e.g., "ADMIN") for use with hasAuthority()
- * - ROLE_ prefixed version (e.g., "ROLE_ADMIN") for use with hasRole()
- * This allows controllers to use either hasRole() or hasAuthority() interchangeably.
+ * Note: This filter creates two versions of each authority: - Plain version
+ * (e.g., "ADMIN") for use with hasAuthority() - ROLE_ prefixed version (e.g.,
+ * "ROLE_ADMIN") for use with hasRole() This allows controllers to use either
+ * hasRole() or hasAuthority() interchangeably.
  * </p>
  *
  * <p>
@@ -74,11 +73,10 @@ public class JwtFilter extends OncePerRequestFilter {
 			throws ServletException, IOException, java.io.IOException {
 
 		String path = req.getServletPath();
-		
+
 		// Skip JWT validation for public endpoints
-		if (path.startsWith("/api/auth/") || 
-		    path.equals("/api/users/change-password-first-login") ||
-		    path.equals("/api/users/update-profile-first-login")) {
+		if (path.startsWith("/api/auth/") || path.equals("/api/users/change-password-first-login")
+				|| path.equals("/api/users/update-profile-first-login")) {
 			chain.doFilter(req, res);
 			return;
 		}
@@ -112,36 +110,33 @@ public class JwtFilter extends OncePerRequestFilter {
 			try {
 				// Extract roles from JWT token claims
 				List<String> rolesFromJwt = jwtUtil.extractRoles(token);
-				
+
 				// Create authorities with both plain and ROLE_ prefixed versions
 				// This allows using both hasAuthority('ADMIN') and hasRole('ADMIN')
 				List<GrantedAuthority> authorities = new ArrayList<>();
 				for (String role : rolesFromJwt) {
 					// Add plain authority (for hasAuthority)
 					authorities.add(new SimpleGrantedAuthority(role));
-					
+
 					// Add ROLE_ prefixed authority (for hasRole)
 					if (!role.startsWith("ROLE_")) {
 						authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
 					}
 				}
-				
+
 				// Load user details for token validation
 				UserDetails userDetails = userService.loadUserByUsername(username);
-				
+
 				// Validate token against user details
 				if (jwtUtil.isTokenValid(token, userDetails)) {
-					
+
 					// Create authentication token with authorities from JWT
 					// Note: Contains both plain and ROLE_ prefixed authorities
-					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-						userDetails,
-						null, 
-						authorities
-					);
+					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
+							null, authorities);
 					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
 					SecurityContextHolder.getContext().setAuthentication(authToken);
-					
+
 //					System.out.println("Authentication successful with authorities: " 
 //							+ SecurityContextHolder.getContext().getAuthentication().getAuthorities());
 				} else {
@@ -162,7 +157,7 @@ public class JwtFilter extends OncePerRequestFilter {
 				return;
 			}
 		}
-		
+
 		// Continue with the filter chain
 		chain.doFilter(req, res);
 	}
