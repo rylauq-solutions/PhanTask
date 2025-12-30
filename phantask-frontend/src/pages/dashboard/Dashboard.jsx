@@ -38,7 +38,7 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const response = await apiService.getMyAttendance();
-        setAttendancePercentage(response.attendancePercentage || 0);
+        setAttendancePercentage(response.attendancePercentage || 100);
       } catch (error) {
         console.error('Failed to fetch attendance:', error);
         setAttendancePercentage(0);

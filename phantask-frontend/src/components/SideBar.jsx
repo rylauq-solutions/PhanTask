@@ -56,7 +56,7 @@ const SideBar = ({ children }) => {
         path: "/admin/manage-feedbacks",
       }
       : {
-        name: "Feedback",
+        name: "Feedbacks",
         icon: "fa-message",           // changed from fa-comment-dots if you want
         path: "/feedback",
       },

@@ -157,7 +157,7 @@ const Attendance = () => {
           <div className="text-center space-y-2.5 sm:space-y-3 w-full">
             <div className="bg-yellow-500/10 border border-yellow-600/30 rounded-lg p-2">
               <p className="text-yellow-700 text-xs font-medium">
-                QR code valid for limited time
+                QR code is valid for limited time only!
               </p>
             </div>
 
