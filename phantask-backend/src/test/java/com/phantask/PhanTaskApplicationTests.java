@@ -1,4 +1,4 @@
-package com.example.phantask;
+package com.phantask;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
