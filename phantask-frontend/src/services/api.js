@@ -1,7 +1,20 @@
 import axios from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+// Dynamically determine API URL based on current host
+const getApiBaseUrl = () => {
+  //* In production (Vercel), use the production API
+  // if (window.location.hostname === "phantask.vercel.app") {
+  //   return "https://spring-monika-latest.onrender.com";
+  // }
+
+  // For local development/testing (localhost or network IP)
+  // Use the same host as the frontend, but port 8080
+  const currentHost = window.location.hostname;
+  const protocol = window.location.protocol; // http: or https:
+  return `${protocol}//${currentHost}:8080/api`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -61,7 +74,7 @@ const refreshAccessToken = async () => {
       {},
       {
         headers: { Authorization: `Bearer ${refreshToken}` },
-      }
+      },
     );
 
     console.log("Token refreshed successfully");
@@ -84,7 +97,7 @@ const refreshAccessToken = async () => {
     console.error(
       "Token refresh failed:",
       e.response?.status,
-      e.response?.data
+      e.response?.data,
     );
 
     // If refresh token is invalid/expired, clear everything
@@ -145,7 +158,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // RESPONSE INTERCEPTOR: Handle 401 errors as backup
@@ -190,7 +203,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export const apiService = {
